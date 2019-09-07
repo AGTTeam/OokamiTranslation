@@ -1,0 +1,8 @@
+__pycache__
+
+venv
+build
+data*
+*.log
+*.spec
+*.exe
