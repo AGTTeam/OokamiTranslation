@@ -4,16 +4,6 @@ import game
 from hacktools import common, nitro
 
 
-def convertPointer(pointer, pointerdiff):
-    newpointer = pointer
-    for k, v in pointerdiff.items():
-        if k < pointer:
-            newpointer += v
-    if newpointer != pointer:
-        common.logDebug("Shifted pointer", pointer + 16, "to", newpointer + 16)
-    return newpointer
-
-
 def run():
     infolder = "data/extract/data/script/"
     outfolder = "data/repack/data/script/"
@@ -143,13 +133,13 @@ def run():
                     f.writeZero(insize - fin.tell())
                     # Write new header offsets
                     f.seek(4)
-                    f.writeUInt(convertPointer(codeoffset, pointerdiff))
+                    f.writeUInt(common.shiftPointer(codeoffset, pointerdiff))
                     f.seek(8, 1)
-                    f.writeUInt(convertPointer(unk, pointerdiff))
-                    f.writeUInt(convertPointer(textoffset, pointerdiff))
-                    f.writeUInt(convertPointer(codeoffset2, pointerdiff))
+                    f.writeUInt(common.shiftPointer(unk, pointerdiff))
+                    f.writeUInt(common.shiftPointer(textoffset, pointerdiff))
+                    f.writeUInt(common.shiftPointer(codeoffset2, pointerdiff))
                     # Shift pointers
                     for k, v in pointers.items():
                         f.seek(k)
-                        f.writeUInt(convertPointer(v, pointerdiff))
+                        f.writeUInt(common.shiftPointer(v, pointerdiff))
     print("Done! Translation is at {0:.2f}%".format((100 * transtot) / chartot))
