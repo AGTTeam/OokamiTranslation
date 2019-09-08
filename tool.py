@@ -2,7 +2,7 @@ import os
 import click
 from hacktools import common, nds
 
-version = "0.9.0"
+version = "0.9.1"
 romfile = "data/rom.nds"
 rompatch = "data/rom_patched.nds"
 headerfile = "data/extract/header.bin"
@@ -18,7 +18,8 @@ outfolder = "data/repack/"
 @click.option("--dat", is_flag=True, default=False)
 @click.option("--ncgr", is_flag=True, default=False)
 @click.option("--wsb", is_flag=True, default=False)
-def extract(rom, bin, dat, ncgr, wsb):
+@click.option("--analyze", default="")
+def extract(rom, bin, dat, ncgr, wsb, analyze):
     all = not rom and not bin and not dat and not ncgr and not wsb
     if all or rom:
         nds.extractRom(romfile, infolder, outfolder)
@@ -30,7 +31,7 @@ def extract(rom, bin, dat, ncgr, wsb):
         extract_dat.run()
     if all or wsb:
         import extract_wsb
-        extract_wsb.run()
+        extract_wsb.run(analyze)
     if all or ncgr:
         import extract_ncgr
         extract_ncgr.run()
