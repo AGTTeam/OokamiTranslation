@@ -4,11 +4,6 @@ import game
 from hacktools import common, nds
 
 
-def compressBinary(infile, outfile, headerlen, footer):
-    # TODO
-    pass
-
-
 def run():
     binin = "data/extract/arm9.bin"
     header = "data/extract/header.bin"
@@ -17,7 +12,6 @@ def run():
     if not os.path.isfile(binfile):
         common.logError("Input file", binfile, "not found")
         return
-    common.copyFile(binin, binout)
 
     section = {}
     with codecs.open(binfile, "r", "utf-8") as bin:
@@ -32,10 +26,11 @@ def run():
         # Decompress binary
         decompfile = binin.replace("arm9.bin", "arm9_dec.bin")
         common.logMessage("Decompressing BIN ...")
-        headerlen, footer = common.decompressBinary(binin, decompfile)
+        nds.decompressBinary(binin, decompfile)
         binin = decompfile
         binout = binout.replace(".bin", "_dec.bin")
 
+    common.copyFile(binin, binout)
     common.logMessage("Repacking BIN from", binfile, "...")
     with common.Stream(binin, "rb") as fi:
         with common.Stream(binout, "r+b") as fo:
@@ -59,4 +54,4 @@ def run():
     if nds.getHeaderID(header) != "YU5J2J":
         compfile = binout.replace("_dec.bin", ".bin")
         common.logMessage("Compressing BIN ...")
-        compressBinary(binout, compfile, headerlen, footer)
+        nds.compressBinary(binout, compfile)
