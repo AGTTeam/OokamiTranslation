@@ -12,7 +12,7 @@ def run():
     common.logMessage("Repacking NCGR from", infolder, "...")
     files = common.getFiles(infolder, ".NCGR")
     for file in common.showProgress(files):
-        pngfile = file.replace(".NCGR", ".png")
+        pngfile = file.replace(".NCGR", ".psd")
         if not os.path.isfile(workfolder + pngfile):
             pngfile = file.replace(".NCGR", ".png")
             if not os.path.isfile(workfolder + pngfile):
