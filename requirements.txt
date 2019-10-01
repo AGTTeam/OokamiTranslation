@@ -6,5 +6,5 @@ docopt==0.6.2
 ndspy==3.0.0
 packbits==0.6
 Pillow==6.1.0
-psd-tools==1.8.28
-tqdm==4.35.0
+psd-tools==1.8.30
+tqdm==4.36.1
