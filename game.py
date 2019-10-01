@@ -139,7 +139,7 @@ def readShiftJIS(f, len2=False, untilZero=False, encoding="shift_jis"):
                     sjis += "[ERROR" + str(f.tell() - 2) + "]"
                 i += 2
                 j += 1
-    if not untilZero and j != strlen and common.warning:
+    if not untilZero and j != strlen:
         common.logWarning("Wrong strlen", strlen, j)
     return sjis, i
 
