@@ -1,6 +1,7 @@
 # Ookami Translation
 ## Setup
-Create a "data" folder and copy the rom as "rom.nds" in it.  
+Create a "data" folder and copy the rom of the first game as "holo.nds" in it.  
+Create a "data2" folder and copy the rom the second game as "holo2.nds" in it.  
 ## Run from binary
 Download the latest [release](https://github.com/Illidanz/OokamiTranslation/releases) outside the data folder.  
 Run "tool extract" to extract everything and "tool repack" to repack after editing.  

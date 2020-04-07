@@ -2,9 +2,9 @@ import os
 import click
 from hacktools import common, nds
 
-version = "0.9.2"
-romfile = "data/rom.nds"
-rompatch = "data/rom_patched.nds"
+version = "0.9.3"
+romfile = "data/holo.nds"
+rompatch = "data/holo_patched.nds"
 headerfile = "data/extract/header.bin"
 bannerfile = "data/repack/banner.bin"
 patchfile = "data/patch.xdelta"
