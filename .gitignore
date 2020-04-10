@@ -4,5 +4,4 @@ venv
 build
 data*
 *.log
-*.spec
 *.exe

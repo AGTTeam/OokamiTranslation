@@ -2,7 +2,7 @@ import os
 import click
 from hacktools import common, nds
 
-version = "0.9.3"
+version = "0.9.4"
 romfile = "data/holo.nds"
 rompatch = "data/holo_patched.nds"
 headerfile = "data/extract/header.bin"
