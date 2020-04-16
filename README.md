@@ -10,14 +10,8 @@ Run "tool extract --help" or "tool repack --help" for more info.
 Install [Python 3.7](https://www.python.org/downloads/), pip and virtualenv.  
 Download [ndstool.exe](https://www.darkfader.net/ds/files/ndstool.exe).  
 Download xdelta.exe.  
-Pull [hacktools](https://github.com/Illidanz/hacktools) in the parent folder.  
-```
-virtualenv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-pip install -e ../hacktools
-```
-Run tool.py or build with "pyinstaller tool.spec".  
+Run "pipenv install".  
+Run the tool with "pipenv run tool.py" or build with "pipenv run pyinstaller tool.spec".  
 ## Text Editing
 Rename the \*\_output.txt files to \*\_input.txt (bin_output.txt to bin_input.txt, etc) and add translations for each line after the "=" sign.  
 The text in wsb_input is automatically wordwrapped, but a "|" can be used to force a line break.  
