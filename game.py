@@ -1,4 +1,4 @@
-from hacktools import common
+from hacktools import common, nitro
 
 # Control codes found in strings
 codes = [0x0D, 0x0A]
@@ -182,3 +182,24 @@ def detectShiftJIS(f, encoding="shift_jis"):
             unk += 1
         else:
             return ""
+
+
+def readImage(infolder, file, extension):
+    palettefile = file.replace(extension, ".NCLR")
+    mapfile = file.replace(extension, ".NSCR")
+    cellfile = file.replace(extension, ".NCER")
+    # Fix palette name for shared palettes
+    if file.startswith("goodsinstance/"):
+        palettefile = "goodsinstance/goodsinstance.NCLR"
+    palettes, image, map, cell, width, height = nitro.readNitroGraphic(infolder + palettefile, infolder + file, infolder + mapfile, infolder + cellfile)
+    # Ignore map for this particular file
+    if file == "cg/cg_shita.NCGR":
+        map = None
+        width = image.width
+        height = image.height
+    return palettes, image, map, cell, width, height, mapfile, cellfile
+
+
+def writeImage(file, image, map, cell, width, height):
+    transptile = "SN/CMN" in file
+    return image, map, cell, width, height, transptile

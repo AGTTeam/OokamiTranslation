@@ -1,6 +1,7 @@
 import os
 import click
-from hacktools import common, nds
+import game
+from hacktools import common, nds, nitro
 
 version = "0.9.4"
 romfile = "data/holo.nds"
@@ -33,8 +34,10 @@ def extract(rom, bin, dat, ncgr, wsb, analyze):
         import extract_wsb
         extract_wsb.run(analyze)
     if all or ncgr:
-        import extract_ncgr
-        extract_ncgr.run()
+        ncgrfolder = "data/extract/data/graphic/"
+        if not os.path.isdir(ncgrfolder):
+            ncgrfolder = "data/extract/data/graphics/"
+        nitro.extractIMG(ncgrfolder, "data/out_NCGR/", ".NCGR", game.readImage)
 
 
 @common.cli.command()
@@ -55,8 +58,12 @@ def repack(no_rom, bin, dat, ncgr, wsb):
         import repack_wsb
         repack_wsb.run()
     if all or ncgr:
-        import repack_ncgr
-        repack_ncgr.run()
+        ncgrfolder = "data/repack/data/graphic/"
+        if not os.path.isdir(ncgrfolder):
+            ncgrfolder = "data/repack/data/graphics/"
+        ncgrfolderin = ncgrfolder.replace("repack", "extract")
+        common.copyFolder(ncgrfolderin, ncgrfolder)
+        nitro.repackIMG("data/work_NCGR/", ncgrfolderin, ncgrfolder, ".NCGR", game.readImage)
 
     if not no_rom:
         subtitle = "My Year With Holo" if nds.getHeaderID(headerfile) == "YU5J2J" else "The Wind that Spans the Sea"
