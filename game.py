@@ -198,8 +198,3 @@ def readImage(infolder, file, extension):
         width = image.width
         height = image.height
     return palettes, image, map, cell, width, height, mapfile, cellfile
-
-
-def writeImage(file, image, map, cell, width, height):
-    transptile = "SN/CMN" in file
-    return image, map, cell, width, height, transptile
