@@ -94,6 +94,10 @@ def writeShiftJIS(f, s, len2=False, untilZero=False, maxlen=0, encoding="shift_j
     return i
 
 
+def writeBINShiftJIS(f, s, maxlen, encoding):
+    writeShiftJIS(f, s, False, True, maxlen, encoding)
+
+
 def readShiftJIS(f, len2=False, untilZero=False, encoding="shift_jis"):
     if untilZero:
         strlen2 = 999

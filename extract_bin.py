@@ -5,7 +5,6 @@ from hacktools import common, nds
 def run():
     infile = "data/extract/arm9.bin"
     header = "data/extract/header.bin"
-    outfile = "data/bin_output.txt"
 
     # Set the appropriate range depending on the game
     if nds.getHeaderID(header) == "YU5J2J":
@@ -18,6 +17,4 @@ def run():
         nds.decompressBinary(infile, decompfile)
         infile = decompfile
 
-    common.logMessage("Extracting BIN to", outfile, "...")
-    foundstrings = nds.extractBinaryStrings(infile, outfile, binrange, game.detectShiftJIS, "cp932")
-    common.logMessage("Done! Extracted", len(foundstrings), "lines")
+    nds.extractBIN(binrange, game.detectShiftJIS, "cp932", infile)
