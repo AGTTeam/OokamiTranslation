@@ -8,12 +8,14 @@ def run():
     infolder = "data/extract/data/script/"
     outfolder = "data/repack/data/script/"
     infile = "data/wsb_input.txt"
-    fontfile = "data/extract/data/font/lcfont12.NFTR"
+    fontfile = "data/replace/data/font/lcfont12.NFTR"
     if not os.path.isfile(infile):
         common.logError("Input file", infile, "not found")
         return
 
     # Read the glyph size from the font
+    if not os.path.isfile(fontfile):
+        fontfile = fontfile.replace("replace/", "extract/")
     glyphs = nitro.getFontGlyphs(fontfile)
     common.logMessage("Repacking WSB from", infile, "...")
     with codecs.open(infile, "r", "utf-8") as wsb:
@@ -142,4 +144,4 @@ def run():
                     for k, v in pointers.items():
                         f.seek(k)
                         f.writeUInt(common.shiftPointer(v, pointerdiff))
-    print("Done! Translation is at {0:.2f}%".format((100 * transtot) / chartot))
+    common.logMessage("Done! Translation is at {0:.2f}%".format((100 * transtot) / chartot))

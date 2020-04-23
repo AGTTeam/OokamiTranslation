@@ -1,9 +1,5 @@
 from hacktools import common, nitro
 
-# Control codes found in strings
-codes = [0x0D, 0x0A]
-# Control codes found in BIN strings
-bincodes = [0x0A, 0x20, 0xA5]
 # Ranges for BIN string locations
 binrange = [(611020, 656160), (801400, 881600)]
 # Identifier and size of WSB code blocks
@@ -95,7 +91,7 @@ def writeShiftJIS(f, s, len2=False, untilZero=False, maxlen=0, encoding="shift_j
 
 
 def writeBINShiftJIS(f, s, maxlen, encoding):
-    writeShiftJIS(f, s, False, True, maxlen, encoding)
+    return writeShiftJIS(f, s, False, True, maxlen, encoding)
 
 
 def readShiftJIS(f, len2=False, untilZero=False, encoding="shift_jis"):
@@ -163,11 +159,13 @@ def detectShiftJIS(f, encoding="shift_jis"):
             if (ret.count("UNK(") * 9) + (ret.count("<") * 4) == len(ret):
                 return ""
             return ret
-        if ret != "" and b1 in bincodes:
+        if ret != "" and (b1 == 0xA5 or b1 == 0x20 or b1 == 0x0A):
             if b1 == 0xA5:
                 ret += "･"
+            elif b1 == 0x20:
+                ret += " "
             else:
-                ret += "<" + common.toHex(b1) + ">"
+                ret += "|"
             continue
         b2 = f.readByte()
         if b1 == 0x0D and b2 == 0x0A:
