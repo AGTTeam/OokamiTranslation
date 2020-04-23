@@ -16,7 +16,7 @@ def run():
     # Read the glyph size from the font
     if not os.path.isfile(fontfile):
         fontfile = fontfile.replace("replace/", "extract/")
-    glyphs = nitro.getFontGlyphs(fontfile)
+    glyphs = nitro.readNFTR(fontfile).glyphs
     common.logMessage("Repacking WSB from", infile, "...")
     with codecs.open(infile, "r", "utf-8") as wsb:
         commonsection = common.getSection(wsb, "COMMON")
