@@ -24,7 +24,7 @@ def run():
         binin = binin.replace(".bin", "_dec.bin")
         binout = binout.replace(".bin", "_dec.bin")
 
-    nds.repackBIN(binrange, game.detectShiftJIS, game.writeBINShiftJIS, "cp932", binin, binout)
+    nds.repackBIN(binrange, None, game.detectShiftJIS, game.writeBINShiftJIS, "cp932", "#", binin, binout)
     if patchfile != "":
         if not os.path.isfile(fontfile):
             fontfile = fontfile.replace("replace/", "extract/")
