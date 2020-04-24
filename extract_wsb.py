@@ -7,7 +7,7 @@ def writeLine(out, pos, b1, b2, line):
     out.write(str(pos).zfill(5) + " 0x" + common.toHex(b1) + ", 0x" + common.toHex(b2) + ": " + line + "  \n")
 
 
-def run(analyzefile):
+def run(firstgame, analyzefile):
     infolder = "data/extract/data/script/"
     outfile = "data/wsb_output.txt"
     analyzeout = "data/wsb_analysis.txt"

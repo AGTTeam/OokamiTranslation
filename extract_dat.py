@@ -4,7 +4,7 @@ import game
 from hacktools import common
 
 
-def run():
+def run(firstgame):
     infolder = "data/extract/data/data/"
     outfile = "data/dat_output.txt"
     ignorefiles = ["route.dat", "debttable.dat", "errandgossip.dat", "market.dat", "traderexptable.dat"]

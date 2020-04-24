@@ -2,12 +2,11 @@ import game
 from hacktools import common, nds
 
 
-def run():
+def run(firstgame):
     infile = "data/extract/arm9.bin"
-    header = "data/extract/header.bin"
 
     # Set the appropriate range depending on the game
-    if nds.getHeaderID(header) == "YU5J2J":
+    if firstgame:
         binrange = game.binrange[0]
     else:
         binrange = game.binrange[1]

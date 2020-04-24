@@ -23,21 +23,20 @@ outfolder = "data/repack/"
 @click.option("--analyze", default="")
 def extract(rom, bin, dat, img, wsb, analyze):
     all = not rom and not bin and not dat and not img and not wsb
+    firstgame = nds.getHeaderID(headerfile) == "YU5J2J"
     if all or rom:
         nds.extractRom(romfile, infolder, outfolder)
     if all or bin:
         import extract_bin
-        extract_bin.run()
+        extract_bin.run(firstgame)
     if all or dat:
         import extract_dat
-        extract_dat.run()
+        extract_dat.run(firstgame)
     if all or wsb:
         import extract_wsb
-        extract_wsb.run(analyze)
+        extract_wsb.run(firstgame, analyze)
     if all or img:
-        ncgrfolder = "data/extract/data/graphic/"
-        if not os.path.isdir(ncgrfolder):
-            ncgrfolder = "data/extract/data/graphics/"
+        ncgrfolder = "data/extract/data/graphic/" if firstgame else "data/extract/data/graphics/"
         nitro.extractIMG(ncgrfolder, "data/out_IMG/", ".NCGR", game.readImage)
 
 
@@ -49,19 +48,18 @@ def extract(rom, bin, dat, img, wsb, analyze):
 @click.option("--wsb", is_flag=True, default=False)
 def repack(no_rom, bin, dat, img, wsb):
     all = not bin and not dat and not img and not wsb
+    firstgame = nds.getHeaderID(headerfile) == "YU5J2J"
     if all or bin:
         import repack_bin
-        repack_bin.run()
+        repack_bin.run(firstgame)
     if all or dat:
         import repack_dat
-        repack_dat.run()
+        repack_dat.run(firstgame)
     if all or wsb:
         import repack_wsb
-        repack_wsb.run()
+        repack_wsb.run(firstgame)
     if all or img:
-        ncgrfolder = "data/repack/data/graphic/"
-        if not os.path.isdir(ncgrfolder):
-            ncgrfolder = "data/repack/data/graphics/"
+        ncgrfolder = "data/repack/data/graphic/" if firstgame else "data/repack/data/graphics/"
         ncgrfolderin = ncgrfolder.replace("repack", "extract")
         common.copyFolder(ncgrfolderin, ncgrfolder)
         nitro.repackIMG("data/work_IMG/", ncgrfolderin, ncgrfolder, ".NCGR", game.readImage)
@@ -69,7 +67,7 @@ def repack(no_rom, bin, dat, img, wsb):
     if not no_rom:
         if os.path.isdir(replacefolder):
             common.mergeFolder(replacefolder, outfolder)
-        subtitle = "My Year With Holo" if nds.getHeaderID(headerfile) == "YU5J2J" else "The Wind that Spans the Sea"
+        subtitle = "My Year With Holo" if firstgame else "The Wind that Spans the Sea"
         nds.editBannerTitle(bannerfile, "Spice & Wolf\n" + subtitle + "\nASCII MEDIA WORKS")
         nds.repackRom(romfile, rompatch, outfolder, patchfile)
 

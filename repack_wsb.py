@@ -4,7 +4,7 @@ import game
 from hacktools import common, nitro
 
 
-def run():
+def run(firstgame):
     infolder = "data/extract/data/script/"
     outfolder = "data/repack/data/script/"
     infile = "data/wsb_input.txt"

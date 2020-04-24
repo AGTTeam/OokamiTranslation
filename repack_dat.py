@@ -4,7 +4,7 @@ import game
 from hacktools import common
 
 
-def run():
+def run(firstgame):
     infolder = "data/extract/data/data/"
     outfolder = "data/repack/data/data/"
     infile = "data/dat_input.txt"

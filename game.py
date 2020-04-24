@@ -1,7 +1,14 @@
 from hacktools import common, nitro
 
 # Ranges for BIN string locations
-binrange = [(611020, 656160), (801400, 881600)]
+binrange = [
+    (0x952CC, 0xA0320),
+    (0xC3A78, 0xD73C0)
+]
+freeranges = [
+    None,
+    None
+]
 # Identifier and size of WSB code blocks
 wsbcodes = {
     (0x81, 0xB9): 6, (0x81, 0x1A): 6,
