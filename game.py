@@ -6,7 +6,7 @@ binrange = [
     (0xC3A78, 0xD73C0)
 ]
 freeranges = [
-    None,
+    [(0x98ce4, 0x98e66), (0x98e74, 0x98ec7), (0x98ed4, 0x99303)],
     None
 ]
 # Identifier and size of WSB code blocks
@@ -163,30 +163,28 @@ def detectShiftJIS(f, encoding="shift_jis"):
     while True:
         b1 = f.readByte()
         if b1 == 0:
-            if (ret.count("UNK(") * 9) + (ret.count("<") * 4) == len(ret):
-                return ""
             return ret
-        if ret != "" and (b1 == 0xA5 or b1 == 0x20 or b1 == 0x0A):
+        if ((b1 >= 0x20 and b1 <= 0x7E) or b1 == 0x0A or b1 == 0xA5) and (len(ret) > 0 or chr(b1) == "%"):
             if b1 == 0xA5:
                 ret += "･"
-            elif b1 == 0x20:
-                ret += " "
-            else:
+            elif b1 == 0x0A:
                 ret += "|"
+            else:
+                ret += chr(b1)
             continue
         b2 = f.readByte()
         if b1 == 0x0D and b2 == 0x0A:
-            ret += "|"
+            ret += "||"
         elif common.checkShiftJIS(b1, b2):
             f.seek(-2, 1)
             try:
                 ret += f.read(2).decode(encoding)
             except UnicodeDecodeError:
-                if unk >= 5:
+                if unk >= 4:
                     return ""
                 ret += writeUNK(b1, b2)
                 unk += 1
-        elif len(ret) > 0 and unk < 5:
+        elif len(ret) > 0 and unk < 4:
             ret += writeUNK(b1, b2)
             unk += 1
         else:
