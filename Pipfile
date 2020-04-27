@@ -8,6 +8,7 @@ pyinstaller = "*"
 
 [packages]
 hacktools = "*"
+ass = "*"
 
 [requires]
 python_version = "3.8"

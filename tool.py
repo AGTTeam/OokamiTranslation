@@ -46,8 +46,9 @@ def extract(rom, bin, dat, img, wsb, analyze):
 @click.option("--dat", is_flag=True, default=False)
 @click.option("--img", is_flag=True, default=False)
 @click.option("--wsb", is_flag=True, default=False)
-def repack(no_rom, bin, dat, img, wsb):
-    all = not bin and not dat and not img and not wsb
+@click.option("--sub", is_flag=True, default=False)
+def repack(no_rom, bin, dat, img, wsb, sub):
+    all = not sub and not bin and not dat and not img and not wsb
     firstgame = nds.getHeaderID(headerfile) == "YU5J2J"
     if all or bin:
         import repack_bin
@@ -58,6 +59,9 @@ def repack(no_rom, bin, dat, img, wsb):
     if all or wsb:
         import repack_wsb
         repack_wsb.run(firstgame)
+    if all or sub:
+        import repack_sub
+        repack_sub.run(firstgame)
     if all or img:
         ncgrfolder = "data/repack/data/graphic/" if firstgame else "data/repack/data/graphics/"
         ncgrfolderin = ncgrfolder.replace("repack", "extract")
