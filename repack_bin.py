@@ -12,13 +12,13 @@ def run(firstgame):
         common.logError("Input file", binfile, "not found")
         return
 
+    patchfile = "bin_patch.asm"
+    fontfile = "data/replace/data/font/lcfont12.NFTR"
+    injectfile = "data/extract/data/font/digit8.NFTR"
     # Set the appropriate range depending on the game
     if firstgame:
         binrange = game.binrange[0]
         freeranges = game.freeranges[0]
-        patchfile = "bin_patch.asm"
-        fontfile = "data/replace/data/font/lcfont12.NFTR"
-        injectfile = "data/extract/data/font/digit8.NFTR"
     else:
         binrange = game.binrange[1]
         freeranges = game.freeranges[1]
