@@ -16,6 +16,9 @@ def run(firstgame):
     encoding = "shift_jis" if firstgame else "shift_jisx0213"
 
     common.logMessage("Repacking DAT from", infile, "...")
+    # Copy this txt file
+    if not firstgame and os.path.isfile(infolder + "facilityhelp.txt"):
+        common.copyFile(infolder + "facilityhelp.txt", outfolder + "facilityhelp.txt")
     with codecs.open(infile, "r", "utf-8") as dat:
         files = common.getFiles(infolder, ".dat")
         for file in common.showProgress(files):
