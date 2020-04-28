@@ -28,6 +28,7 @@ wsbpointers = [(0xCA, 0x00), (0xCB, 0x00), (0xCD, 0x00), (0xCE, 0x00), (0xCF, 0x
 
 # Game-specific string
 def writeShiftJIS(f, s, len2=False, untilZero=False, maxlen=0, encoding="shift_jis"):
+    s = s.replace("～", "〜")
     if not untilZero:
         pos = f.tell()
         if len2:
@@ -140,10 +141,10 @@ def readShiftJIS(f, len2=False, untilZero=False, encoding="shift_jis"):
             else:
                 f.seek(-2, 1)
                 try:
-                    sjis += f.read(2).decode(encoding)
+                    sjis += f.read(2).decode(encoding).replace("〜", "～")
                 except UnicodeDecodeError:
-                    common.logDebug("UnicodeDecodeError")
-                    sjis += "[ERROR" + str(f.tell() - 2) + "]"
+                    common.logDebug("UnicodeDecodeError at", f.tell() - 2)
+                    sjis += "UNK(" + common.toHex(b1) + common.toHex(b2) + ")"
                 i += 2
                 j += 1
     if not untilZero and j != strlen:
@@ -178,7 +179,7 @@ def detectShiftJIS(f, encoding="shift_jis"):
         elif common.checkShiftJIS(b1, b2):
             f.seek(-2, 1)
             try:
-                ret += f.read(2).decode(encoding)
+                ret += f.read(2).decode(encoding).replace("〜", "～")
             except UnicodeDecodeError:
                 if unk >= 4:
                     return ""

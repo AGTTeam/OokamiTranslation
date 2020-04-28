@@ -1,4 +1,5 @@
 import codecs
+import os
 import game
 from hacktools import common
 
@@ -10,17 +11,26 @@ def writeLine(out, pos, b1, b2, line):
 def run(firstgame, analyzefile):
     infolder = "data/extract/data/script/"
     outfile = "data/wsb_output.txt"
+    commonfile = "data/common.txt"
     analyzeout = "data/wsb_analysis.txt"
 
-    foundstr = {}
-    checkstr = {}
-    commonstr = []
+    commonstr = {}
+    # Read common strings from another file
+    if os.path.isfile(commonfile):
+        with codecs.open(commonfile, "r", "utf-8") as commonf:
+            commonstr = common.getSection(commonf, "COMMON")
+    encoding = "shift_jis" if firstgame else "shift_jisx0213"
     common.logMessage("Extracting WSB to", outfile, "...")
     with codecs.open(analyzeout, "w", "utf-8") as a:
         with codecs.open(outfile, "w", "utf-8") as out:
+            if len(commonstr) > 0:
+                out.write("!FILE:COMMON\n")
+                for s in commonstr:
+                    out.write(s + "=\n")
             files = common.getFiles(infolder, ".wsb")
             for file in common.showProgress(files):
-                analyze = file.endswith(analyzefile)
+                analyze = analyzefile != "" and file.endswith(analyzefile)
+                first = True
                 common.logDebug("Processing", file, "...")
                 with common.Stream(infolder + file, "rb") as f:
                     f.seek(4)  # 0x10
@@ -41,14 +51,15 @@ def run(firstgame, analyzefile):
                             if analyze:
                                 lenline = f.readBytes(4 if b1 == 0x95 else 2)
                                 f.seek(-(4 if b1 == 0x95 else 2), 1)
-                            sjis, strlen = game.readShiftJIS(f, b1 == 0x95)
+                            sjis, strlen = game.readShiftJIS(f, b1 == 0x95, False, encoding)
                             if sjis != "" and sjis != ">>" and sjis != "　":
-                                if file not in foundstr:
-                                    foundstr[file] = []
                                 sjissplit = sjis.split(">>")
                                 for sjisline in sjissplit:
-                                    if sjisline != "" and sjisline != "　":
-                                        foundstr[file].append(sjisline)
+                                    if sjisline != "" and sjisline != "　" and sjisline not in commonstr:
+                                        if first:
+                                            out.write("!FILE:" + file + "\n")
+                                            first = False
+                                        out.write(sjisline + "=\n")
                             if analyze:
                                 writeLine(a, pos, b1, b2, lenline + sjis)
                         elif (b1, b2) in game.wsbcodes:
@@ -65,32 +76,13 @@ def run(firstgame, analyzefile):
                             f.seek(codeoffset + 4 + 4 * i)
                             codepointer = f.readUInt()
                             f.seek(codeoffset + codepointer)
-                            sjis, codelen = game.readShiftJIS(f, False, True)
+                            sjis, codelen = game.readShiftJIS(f, False, True, encoding)
                             # Ignore ASCII strings and a particular debug line found in every file
-                            if not common.isAscii(sjis) and sjis.find("%d, %d") < 0:
-                                foundstr[file].append(sjis)
+                            if not common.isAscii(sjis) and sjis.find("%d, %d") < 0 and sjis not in commonstr:
+                                if first:
+                                    out.write("!FILE:" + file + "\n")
+                                    first = False
+                                out.write(sjis + "=\n")
                             if analyze:
                                 writeLine(a, i, 0, 0, str(codepointer) + " " + sjis)
-            # Check duplicates
-            for k, v in foundstr.items():
-                for s in v:
-                    if s not in checkstr:
-                        checkstr[s] = 1
-                    else:
-                        checkstr[s] += 1
-                        if checkstr[s] == 10:
-                            commonstr.append(s)
-            # Write the output file
-            if len(commonstr) > 0:
-                out.write("!FILE:COMMON\n")
-                for s in commonstr:
-                    out.write(s + "=\n")
-            for k, v in foundstr.items():
-                first = True
-                for s in v:
-                    if s not in commonstr:
-                        if first:
-                            out.write("!FILE:" + k + "\n")
-                            first = False
-                        out.write(s + "=\n")
     common.logMessage("Done! Extracted", len(files), "files")

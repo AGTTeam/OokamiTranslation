@@ -17,6 +17,7 @@ def run(firstgame):
     if not os.path.isfile(fontfile):
         fontfile = fontfile.replace("replace/", "extract/")
     glyphs = nitro.readNFTR(fontfile).glyphs
+    encoding = "shift_jis" if firstgame else "shift_jisx0213"
     common.logMessage("Repacking WSB from", infile, "...")
     with codecs.open(infile, "r", "utf-8") as wsb:
         commonsection = common.getSection(wsb, "COMMON")
@@ -53,7 +54,7 @@ def run(firstgame):
                         f.writeByte(b1)
                         f.writeByte(b2)
                         if (b1 == 0x55 and b2 == 0x08) or (b1 == 0x95 and b2 == 0x10):
-                            sjis, oldlen = game.readShiftJIS(fin, b1 == 0x95)
+                            sjis, oldlen = game.readShiftJIS(fin, b1 == 0x95, False, encoding)
                             strreplaced = False
                             if sjis != "" and sjis != ">>":
                                 sjissplit = sjis.split(">>")
@@ -75,14 +76,14 @@ def run(firstgame):
                                 if newsjis != sjis and newsjis != "" and newsjis != ">>":
                                     common.logDebug("Repacking at", pos)
                                     strreplaced = True
-                                    newlen = game.writeShiftJIS(f, newsjis, b1 == 0x95)
+                                    newlen = game.writeShiftJIS(f, newsjis, b1 == 0x95, False, 0, encoding)
                                     lendiff = newlen - oldlen
                                     if newlen > 0x80 and b1 == 0x55:
                                         common.logDebug("String is too long", newlen, "changing to 0x95")
                                         f.seek(fpos)
                                         f.writeByte(0x95)
                                         f.writeByte(0x10)
-                                        game.writeShiftJIS(f, newsjis, True)
+                                        game.writeShiftJIS(f, newsjis, True, False, 0, encoding)
                                         lendiff += 2
                                     if lendiff != 0:
                                         common.logDebug("Adding", lendiff, "at", pos)
@@ -115,7 +116,7 @@ def run(firstgame):
                             f.writeUInt(codepointer + codediff)
                             fin.seek(codeoffset + codepointer)
                             f.seek(newcodeoffset + codepointer + codediff)
-                            sjis, codelen = game.readShiftJIS(fin, False, True)
+                            sjis, codelen = game.readShiftJIS(fin, False, True, encoding)
                             strreplaced = False
                             if sjis in section or sjis in commonsection:
                                 if sjis in commonsection:
@@ -126,7 +127,7 @@ def run(firstgame):
                                         del section[sjis]
                                 if newsjis != "":
                                     strreplaced = True
-                                    newcodelen = game.writeShiftJIS(f, newsjis, False, True)
+                                    newcodelen = game.writeShiftJIS(f, newsjis, False, True, 0, encoding)
                                     if codelen != newcodelen:
                                         codediff += newcodelen - codelen
                             if not strreplaced:

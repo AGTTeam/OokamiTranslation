@@ -8,6 +8,9 @@ def run(firstgame):
     infolder = "data/extract/data/data/"
     outfile = "data/dat_output.txt"
     ignorefiles = ["route.dat", "debttable.dat", "errandgossip.dat", "market.dat", "traderexptable.dat"]
+    if not firstgame:
+        ignorefiles.append("love_event.dat")
+    encoding = "shift_jis" if firstgame else "shift_jisx0213"
 
     common.logMessage("Extracting DAT to", outfile, "...")
     with codecs.open(outfile, "w", "utf-8") as out:
@@ -23,8 +26,8 @@ def run(firstgame):
             with common.Stream(infolder + file, "rb") as f:
                 while f.tell() < size - 2:
                     pos = f.tell()
-                    check = game.detectShiftJIS(f)
-                    if check != "":
+                    check = game.detectShiftJIS(f, encoding)
+                    if check != "" and check != "%":
                         # Check for repeated strings, only within a single file
                         if check not in foundstrings:
                             common.logDebug("Found string at", pos)

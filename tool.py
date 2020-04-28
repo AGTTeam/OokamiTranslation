@@ -23,9 +23,9 @@ outfolder = "data/repack/"
 @click.option("--analyze", default="")
 def extract(rom, bin, dat, img, wsb, analyze):
     all = not rom and not bin and not dat and not img and not wsb
-    firstgame = nds.getHeaderID(headerfile) == "YU5J2J"
     if all or rom:
-        nds.extractRom(romfile, infolder, outfolder)
+        nds.extractRom(romfile if os.path.isfile(romfile) else romfile.replace("holo", "holo2"), infolder, outfolder)
+    firstgame = nds.getHeaderID(headerfile) == "YU5J2J"
     if all or bin:
         import extract_bin
         extract_bin.run(firstgame)
