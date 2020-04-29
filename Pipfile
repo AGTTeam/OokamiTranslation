@@ -9,6 +9,7 @@ pyinstaller = "*"
 [packages]
 hacktools = "*"
 ass = "*"
+ndstextgen = "*"
 
 [requires]
 python_version = "3.8"

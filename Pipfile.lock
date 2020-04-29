@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "09a69131b87e82f6204e32c9dbcd75061dea271d9e4f244805847e8c39586ce0"
+            "sha256": "9db84ebdf769b29b5686a2fa24d967fc7c567ebb6031dbac683a4c40ae903621"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -66,10 +66,10 @@
         },
         "click": {
             "hashes": [
-                "sha256:8a18b4ea89d8820c5d0c7da8a64b2c324b4dabb695804dbfea19b9be9d88c0cc",
-                "sha256:e345d143d80bf5ee7534056164e5e112ea5e22716bbb1ce727941f4c8b471b9a"
+                "sha256:d2b5255c7c6349bc1bd1e59e08cd12acbbd63ce649f2588755783aa94dfb6b1a",
+                "sha256:dacca89f4bfadd5de3d7489b7c8a566eee0d3676333fbb50030263894c38c0dc"
             ],
-            "version": "==7.1.1"
+            "version": "==7.1.2"
         },
         "crcmod": {
             "hashes": [
@@ -85,11 +85,11 @@
         },
         "hacktools": {
             "hashes": [
-                "sha256:78befa64a39ea176600abdc1e6c97b04ef7c79c865534a2f16448bb1e6c42012",
-                "sha256:f0eaf6658058670314053432ae9eab2a3c4419925f52eeb88ecb8793dc9c6094"
+                "sha256:6a898bcae8d426b159769442cc307866a69db46012a1de7a6fa388e10d630995",
+                "sha256:bbba43e5cee7497bda89e9155df93053c53231fc101a5e9e8abc26117c3a0c6e"
             ],
             "index": "pypi",
-            "version": "==0.10.2"
+            "version": "==0.10.3"
         },
         "ndspy": {
             "hashes": [
@@ -97,6 +97,14 @@
                 "sha256:800c9e6154fdee2712657c0be9cea5f2c7c1f513f26e3344ac3b16d9d1fca478"
             ],
             "version": "==3.0.0"
+        },
+        "ndstextgen": {
+            "hashes": [
+                "sha256:27e40a3a51e8bd6a2ae0fd4aefba91abca5ee289c2d214edad37548ba4559c3d",
+                "sha256:3ae358537e16a9f20ad1cd23cf60133d6015cd24d58130a342fe62695a607943"
+            ],
+            "index": "pypi",
+            "version": "==1.4.0"
         },
         "pillow": {
             "hashes": [
