@@ -17,9 +17,11 @@ def run(firstgame):
     if firstgame:
         palfile = "data/extract/data/graphic/title/logo.NCLR"
         bgcolor = "#F8F8F8"
+        addframes = 6
     else:
         palfile = "data/extract/data/graphics/systemmenu/BottomBG.NCLR"
         bgcolor = "transparent"
+        addframes = 10
 
     if not os.path.isfile(subin):
         common.logError("Input file", subin, "not found")
@@ -35,8 +37,8 @@ def run(firstgame):
     with codecs.open(subin, "r", "utf-8-sig") as f:
         doc = ass.parse(f)
     for event in doc.events:
-        linestart = deltaToFrame(event.start)
-        lineend = deltaToFrame(event.end)
+        linestart = deltaToFrame(event.start) + addframes
+        lineend = deltaToFrame(event.end) + addframes
         subdata.append({"start": linestart, "end": lineend, "pos": 0})
         text += event.text.strip() + "\n"
     text = text.strip()
