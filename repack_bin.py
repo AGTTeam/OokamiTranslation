@@ -31,7 +31,7 @@ def run(firstgame):
             fontfile = fontfile.replace("replace/", "extract/")
         common.copyFile(injectfile, injectfile.replace("extract/", "repack/"))
         nitro.extractFontData(fontfile, "data/font_data.bin")
-        common.armipsPatch(patchfile)
+        common.armipsPatch(common.bundledFile(patchfile))
     if not firstgame:
         compfile = binout.replace("_dec.bin", ".bin")
         common.logMessage("Compressing BIN ...")
