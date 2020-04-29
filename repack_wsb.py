@@ -25,9 +25,6 @@ def run(firstgame):
         files = common.getFiles(infolder, ".wsb")
         for file in common.showProgress(files):
             section = common.getSection(wsb, file)
-            if len(section) == 0:
-                common.copyFile(infolder + file, outfolder + file)
-                continue
             chartot, transtot = common.getSectionPercentage(section, chartot, transtot)
             # Repack the file
             pointerdiff = {}
