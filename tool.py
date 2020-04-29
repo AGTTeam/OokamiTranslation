@@ -59,7 +59,7 @@ def repack(no_rom, bin, dat, img, wsb, sub):
     if all or wsb:
         import repack_wsb
         repack_wsb.run(firstgame)
-    if all or sub:
+    if all or dat or sub:
         import repack_sub
         repack_sub.run(firstgame)
     if all or img:
