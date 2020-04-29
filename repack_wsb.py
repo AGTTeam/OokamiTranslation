@@ -13,12 +13,12 @@ def run(firstgame):
         common.logError("Input file", infile, "not found")
         return
 
+    encoding = "shift_jis" if firstgame else "shift_jisx0213"
+    common.logMessage("Repacking WSB from", infile, "...")
     # Read the glyph size from the font
     if not os.path.isfile(fontfile):
         fontfile = fontfile.replace("replace/", "extract/")
     glyphs = nitro.readNFTR(fontfile).glyphs
-    encoding = "shift_jis" if firstgame else "shift_jisx0213"
-    common.logMessage("Repacking WSB from", infile, "...")
     with codecs.open(infile, "r", "utf-8") as wsb:
         commonsection = common.getSection(wsb, "COMMON")
         chartot, transtot = common.getSectionPercentage(commonsection)

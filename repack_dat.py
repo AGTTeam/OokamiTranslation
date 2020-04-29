@@ -1,21 +1,26 @@
 import codecs
 import os
 import game
-from hacktools import common
+from hacktools import common, nitro
 
 
 def run(firstgame):
     infolder = "data/extract/data/data/"
     outfolder = "data/repack/data/data/"
     infile = "data/dat_input.txt"
+    fontfile = "data/replace/data/font/lcfont12.NFTR"
     if not os.path.isfile(infile):
         common.logError("Input file", infile, "not found")
         return
     common.makeFolder(outfolder)
     chartot = transtot = 0
-    encoding = "shift_jis" if firstgame else "shift_jisx0213"
 
+    encoding = "shift_jis" if firstgame else "shift_jisx0213"
     common.logMessage("Repacking DAT from", infile, "...")
+    # Read the glyph size from the font
+    if not os.path.isfile(fontfile):
+        fontfile = fontfile.replace("replace/", "extract/")
+    glyphs = nitro.readNFTR(fontfile).glyphs
     # Copy this txt file
     if not firstgame and os.path.isfile(infolder + "facilityhelp.txt"):
         common.copyFile(infolder + "facilityhelp.txt", outfolder + "facilityhelp.txt")
@@ -43,7 +48,10 @@ def run(firstgame):
                             if check in section and section[check][0] != "":
                                 common.logDebug("Replacing string at", pos)
                                 f.seek(pos)
-                                game.writeShiftJIS(f, section[check][0], False, True, 0, encoding)
+                                newsjis = section[check][0]
+                                if file == "goods.dat":
+                                    newsjis = common.wordwrap(newsjis, glyphs, 170)
+                                game.writeShiftJIS(f, newsjis, False, True, 0, encoding)
                                 # Pad with 0s if the line is shorter
                                 while f.tell() < fin.tell():
                                     f.writeByte(0x00)
