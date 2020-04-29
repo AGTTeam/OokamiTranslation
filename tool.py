@@ -47,7 +47,8 @@ def extract(rom, bin, dat, img, wsb, analyze):
 @click.option("--img", is_flag=True, default=False)
 @click.option("--wsb", is_flag=True, default=False)
 @click.option("--sub", is_flag=True, default=False)
-def repack(no_rom, bin, dat, img, wsb, sub):
+@click.option("--force", default="")
+def repack(no_rom, bin, dat, img, wsb, sub, force):
     all = not sub and not bin and not dat and not img and not wsb
     firstgame = nds.getHeaderID(headerfile) == "YU5J2J"
     if all or bin:
@@ -71,6 +72,8 @@ def repack(no_rom, bin, dat, img, wsb, sub):
     if not no_rom:
         if os.path.isdir(replacefolder):
             common.mergeFolder(replacefolder, outfolder)
+        if force != "":
+            common.copyFile(outfolder + "data/script/" + force + ".wsb", outfolder + "data/script/event/ev_act/act_010_opening.wsb")
         subtitle = "My Year With Holo" if firstgame else "The Wind that Spans the Sea"
         nds.editBannerTitle(bannerfile, "Spice & Wolf\n" + subtitle + "\nASCII MEDIA WORKS")
         romf = romfile if os.path.isfile(romfile) else romfile.replace("holo", "holo2")
