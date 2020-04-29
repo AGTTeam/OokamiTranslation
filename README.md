@@ -23,5 +23,5 @@ Comments can be added at the end of lines by using #
 Rename the out\_\* folders to work\_\* (out_IMG to work_IMG, etc).  
 Edit the images in the work folder(s). The palette on the right should be followed but the repacker will try to approximate other colors to the closest one.  
 If an image doesn't require repacking, it should be deleted from the work folder.  
-## Scripts testing
+## Scripts Testing
 A script can be forced by replacing the new game script using the force parameter while repacking, for example: `--force event/ev_act/test_script2`
