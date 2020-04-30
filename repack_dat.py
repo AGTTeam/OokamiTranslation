@@ -51,6 +51,8 @@ def run(firstgame):
                                 newsjis = section[check][0]
                                 if file == "goods.dat":
                                     newsjis = common.wordwrap(newsjis, glyphs, 170)
+                                elif file == "gossip.dat":
+                                    newsjis = common.wordwrap(newsjis, glyphs, 190)
                                 game.writeShiftJIS(f, newsjis, False, True, 0, encoding)
                                 # Pad with 0s if the line is shorter
                                 while f.tell() < fin.tell():
