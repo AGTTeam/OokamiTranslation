@@ -37,15 +37,75 @@
   .align
 
   ;Add WVF support to script dialogs
-  VWF_HACK:
+  VWF:
   .if FIRST_GAME
-    ldrsb r1,[r6,0xe5] ;Read the current character
-    sub r1,r1,0x20     ;Subtract the first character code
+    ldrb r1,[r6,0xe5]  ;Read the current character
     ldr r2,=FONT_DATA  ;r2 = font HDWC offset
+    sub r1,r1,0x20     ;Subtract the first character code
     add r1,r1,r2       ;Add it to r1
     ldrb r1,[r1]       ;Set r1 to the next offset
     add r0,r0,r1       ;Add it to r0
-    b VWF_HACK_RETURN
+    b VWF_RETURN
+  .else
+    ;TODO
+  .endif
+  .pool
+
+  ;Center the choices text. This is originally calculated by
+  ;multiplying the max line length by a constant
+  CENTERING:
+  .if FIRST_GAME
+    ;r1 = Result
+    ;r9 = Pointer to the string
+    push {r0,r2,r3,r9}
+    ldr r0,=FONT_DATA
+    mov r1,0x0
+    mov r3,0x0
+    ;Loop the choice characters
+    CENTERING_LOOP:
+    ;Read the character
+    ldrb r2,[r9],0x1
+    ;Finish when reaching 0
+    cmp r2,0x0
+    beq CENTERING_END
+    ;Handle newlines
+    cmp r2,0x0a
+    cmpne r2,0x0d
+    beq CENTERING_NL
+    ;Handle shift-jis
+    ;>=0xe0
+    cmp r2,0xe0
+    addge r3,r3,0xc
+    addge r9,r9,0x1
+    bge CENTERING_LOOP
+    ;>0xa0
+    cmp r2,0xa0
+    addgt r3,r3,0x6
+    bgt CENTERING_LOOP
+    ;>=0x81
+    cmp r2,0x81
+    addge r3,r3,0xc
+    addge r9,r9,0x1
+    bge CENTERING_LOOP
+    ;Add the character width
+    sub r2,r2,0x20
+    add r2,r0,r2
+    ldrb r2,[r2]
+    add r3,r3,r2
+    b CENTERING_LOOP
+    CENTERING_NL:
+    cmp r3,r1
+    movgt r1,r3
+    mov r3,0x0
+    b CENTERING_LOOP
+    CENTERING_END:
+    ;Get the max value
+    cmp r3,r1
+    movgt r1,r3
+    ;Divide by 2
+    lsr r1,r1,0x1
+    pop {r0,r2,r3,r9}
+    b CENTERING_RETURN
   .else
     ;TODO
   .endif
@@ -57,7 +117,7 @@
   .align
 
   ;Load the subtitles file in ram
-  SUBTITLE_HACK:
+  SUBTITLE:
   .if FIRST_GAME
     ;This functions loads the file r1 into r0+0xc, but only up
     ;to 0xa78 bytes, so we temporarily modify that max size
@@ -124,18 +184,18 @@
     pop {r0-r2}
     mov r4,r0
   .endif
-  b SUBTITLE_HACK_RETURN
+  b SUBTITLE_RETURN
   .pool
 
   .if SECOND_GAME
-    SUBTITLE_RAM_HACK:
+    SUBTITLE_RAM:
     ldr r2,=SUB_RAM
     ldr r2,[r2]
     cmp r2,0x0
     movne r2,0x8c0
-    bne SUBTITLE_RAM_HACK_RETURN
+    bne SUBTITLE_RAM_RETURN
     ldr r2,=0xfffff
-    b SUBTITLE_RAM_HACK_RETURN
+    b SUBTITLE_RAM_RETURN
     .pool
   .endif
 
@@ -205,26 +265,34 @@
   .if FIRST_GAME
     .org 0x0203a8ec
       ;Original: add r0,r0,0x6
-      b VWF_HACK
-      VWF_HACK_RETURN:
+      b VWF
+      VWF_RETURN:
+    .org 0x02030304
+      ;Original: add r1,r6,r6,lsl 0x1
+      b CENTERING
+      CENTERING_RETURN:
     .org 0x020216d0
       ;Original: add r0,r6,0x1000
-      b SUBTITLE_HACK
-      SUBTITLE_HACK_RETURN:
+      b SUBTITLE
+      SUBTITLE_RETURN:
     .org 0x0206ba2c
       ;Original: ldr r0,[r10,0x8]
       b SUBTITLE_FRAME
       SUBTITLE_FRAME_RETURN:
+    ;Increase space for the market header
+    .org 0x020450dc
+      ;Original: mov r3,0x19
+      mov r3,0x20
   .else
     ;TODO: VWF_HACK hack
     .org 0x0209d1c4
       ;Original: mov r4,r0
-      b SUBTITLE_HACK
-      SUBTITLE_HACK_RETURN:
+      b SUBTITLE
+      SUBTITLE_RETURN:
     .org 0x02098854
       ;Original: mov r2,0x8c0
-      b SUBTITLE_RAM_HACK
-      SUBTITLE_RAM_HACK_RETURN:
+      b SUBTITLE_RAM
+      SUBTITLE_RAM_RETURN:
     .org 0x0209f1e0
       ;Original: add r1,r1,0x1
       b SUBTITLE_FRAME
