@@ -165,11 +165,14 @@ def writeUNK(b1, b2):
 def detectShiftJIS(f, encoding="shift_jis"):
     ret = ""
     unk = 0
+    monthsection = f.tell() >= 0x97920 and f.tell() <= 0x9797f
     while True:
+        if f.tell() >= 0x9791c and f.tell() <= 0x9791f:
+            return ""
         b1 = f.readByte()
         if b1 == 0:
             return ret
-        if ((b1 >= 0x20 and b1 <= 0x7E) or b1 == 0x0A or b1 == 0xA5) and (len(ret) > 0 or chr(b1) == "%"):
+        if ((b1 >= 0x20 and b1 <= 0x7E) or b1 == 0x0A or b1 == 0xA5) and (len(ret) > 0 or chr(b1) == "%" or chr(b1) == "L" or monthsection):
             if b1 == 0xA5:
                 ret += "･"
             elif b1 == 0x0A:
