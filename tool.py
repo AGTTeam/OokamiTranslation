@@ -74,7 +74,7 @@ def repack(no_rom, bin, dat, img, wsb, sub, force):
             common.mergeFolder(replacefolder, outfolder)
         if force != "":
             common.copyFile(outfolder + "data/script/" + force + ".wsb", outfolder + "data/script/event/ev_act/act_010_opening.wsb")
-        subtitle = "My Year With Holo" if firstgame else "The Wind that Spans the Sea"
+        subtitle = "My Year with Holo" if firstgame else "The Wind that Spans the Sea"
         nds.editBannerTitle(bannerfile, "Spice & Wolf\n" + subtitle + "\nASCII MEDIA WORKS")
         romf = romfile if os.path.isfile(romfile) else romfile.replace("holo", "holo2")
         romp = rompatch if os.path.isfile(romfile) else rompatch.replace("holo", "holo2")
