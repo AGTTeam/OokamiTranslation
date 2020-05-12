@@ -9,6 +9,7 @@ Run `tool extract --help` or `tool repack --help` for more info.
 ## Run from source
 Install [Python 3.8](https://www.python.org/downloads/) and pipenv.  
 Download [ndstool.exe](https://www.darkfader.net/ds/files/ndstool.exe).  
+Download [armips.exe](https://github.com/Kingcom/armips/releases).  
 Download xdelta.exe.  
 Run `pipenv install`.  
 Run the tool with `pipenv run tool.py` or build with `pipenv run pyinstaller tool.spec`.  
