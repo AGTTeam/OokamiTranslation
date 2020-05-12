@@ -1,13 +1,8 @@
 import codecs
-import math
 import os
 import ass
 import ndstextgen
 from hacktools import common, nitro
-
-
-def deltaToFrame(delta):
-    return int((delta.seconds * 30) + math.ceil(delta.microseconds / (1000 * 1000 / 30)))
 
 
 def run(firstgame):
@@ -37,8 +32,8 @@ def run(firstgame):
     with codecs.open(subin, "r", "utf-8-sig") as f:
         doc = ass.parse(f)
     for event in doc.events:
-        linestart = deltaToFrame(event.start) + addframes
-        lineend = deltaToFrame(event.end) + addframes
+        linestart = common.deltaToFrame(event.start) + addframes
+        lineend = common.deltaToFrame(event.end) + addframes
         subdata.append({"start": linestart, "end": lineend, "pos": 0})
         text += event.text.strip() + "\n"
     text = text.strip()
