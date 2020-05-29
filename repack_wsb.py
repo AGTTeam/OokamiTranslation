@@ -20,11 +20,11 @@ def run(firstgame):
         fontfile = fontfile.replace("replace/", "extract/")
     glyphs = nitro.readNFTR(fontfile).glyphs
     with codecs.open(infile, "r", "utf-8") as wsb:
-        commonsection = common.getSection(wsb, "COMMON")
+        commonsection = common.getSection(wsb, "COMMON", fixchars=game.fixchars)
         chartot, transtot = common.getSectionPercentage(commonsection)
         files = common.getFiles(infolder, ".wsb")
         for file in common.showProgress(files):
-            section = common.getSection(wsb, file)
+            section = common.getSection(wsb, file, fixchars=game.fixchars)
             chartot, transtot = common.getSectionPercentage(section, chartot, transtot)
             # Repack the file
             pointerdiff = {}
@@ -73,6 +73,8 @@ def run(firstgame):
                                 if newsjis != sjis and newsjis != "" and newsjis != ">>":
                                     common.logDebug("Repacking at", pos)
                                     strreplaced = True
+                                    if newsjis == "!":
+                                        newsjis = ""
                                     newlen = game.writeShiftJIS(f, newsjis, b1 == 0x95, False, 0, encoding)
                                     lendiff = newlen - oldlen
                                     if newlen > 0x80 and b1 == 0x55:
