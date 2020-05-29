@@ -38,22 +38,25 @@
 
   ;Add WVF support to script dialogs
   VWF:
+  push {lr}
   .if FIRST_GAME
-    ldrb r1,[r6,0xe5]  ;Read the current character
-    ldr r2,=FONT_DATA  ;r2 = font HDWC offset
-    sub r1,r1,0x20     ;Subtract the first character code
-    add r1,r1,r2       ;Add it to r1
-    ldrb r1,[r1]       ;Set r1 to the next offset
-    add r0,r0,r1       ;Add it to r0
-    b VWF_RETURN
+    ;Read the current character and set r0 to the VWF value
+    ldrb r1,[r6,0xe5]
+    ldr r2,=FONT_DATA
+    sub r1,r1,0x20
+    add r1,r1,r2
+    ldrb r1,[r1]
+    add r0,r0,r1
   .else
     ;TODO
   .endif
+  pop {pc}
   .pool
 
   ;Center the choices text. This is originally calculated by
   ;multiplying the max line length by a constant
   CENTERING:
+  push {lr}
   .if FIRST_GAME
     ;r1 = Result
     ;r9 = Pointer to the string
@@ -62,53 +65,53 @@
     mov r1,0x0
     mov r3,0x0
     ;Loop the choice characters
-    CENTERING_LOOP:
+    @@loop:
     ;Read the character
     ldrb r2,[r9],0x1
     ;Finish when reaching 0
     cmp r2,0x0
-    beq CENTERING_END
+    beq @@end
     ;Handle newlines
     cmp r2,0x0a
     cmpne r2,0x0d
-    beq CENTERING_NL
+    beq @@newline
     ;Handle shift-jis
     ;>=0xe0
     cmp r2,0xe0
     addge r3,r3,0xc
     addge r9,r9,0x1
-    bge CENTERING_LOOP
+    bge @@loop
     ;>0xa0
     cmp r2,0xa0
     addgt r3,r3,0x6
-    bgt CENTERING_LOOP
+    bgt @@loop
     ;>=0x81
     cmp r2,0x81
     addge r3,r3,0xc
     addge r9,r9,0x1
-    bge CENTERING_LOOP
+    bge @@loop
     ;Add the character width
     sub r2,r2,0x20
     add r2,r0,r2
     ldrb r2,[r2]
     add r3,r3,r2
-    b CENTERING_LOOP
-    CENTERING_NL:
+    b @@loop
+    @@newline:
     cmp r3,r1
     movgt r1,r3
     mov r3,0x0
-    b CENTERING_LOOP
-    CENTERING_END:
+    b @@loop
+    @@end:
     ;Get the max value
     cmp r3,r1
     movgt r1,r3
     ;Divide by 2
     lsr r1,r1,0x1
     pop {r0,r2,r3,r9}
-    b CENTERING_RETURN
   .else
     ;TODO
   .endif
+  pop {pc}
   .pool
 
   ;File containing the the opening sub graphics
@@ -118,6 +121,7 @@
 
   ;Load the subtitles file in ram
   SUBTITLE:
+  push {lr}
   .if FIRST_GAME
     ;This functions loads the file r1 into r0+0xc, but only up
     ;to 0xa78 bytes, so we temporarily modify that max size
@@ -157,11 +161,11 @@
     ;Set the map
     ldr r0,=0x6201000
     mov r1,0x0
-    SUB_MAP_LOOP:
+    @@mapLoop:
     strh r1,[r0],0x2
     add r1,0x1
     cmp r1,0x60
-    bne SUB_MAP_LOOP
+    bne @@mapLoop
     ;Set VRAM H to LCD
     ldr r0,=0x04000248
     mov r1,0x80
@@ -170,12 +174,12 @@
     ldr r0,=0x06898000
     ldr r1,=0x0689A000
     mov r2,0x80
-    SUB_PAL_LOOP:
+    @@palLoop:
     ldr r4,[r0],0x4
     str r4,[r1],0x4
     sub r2,r2,0x1
     cmp r2,0x0
-    bne SUB_PAL_LOOP
+    bne @@palLoop
     ;Set VRAM H back to ext palette
     ldr r0,=0x04000248
     mov r1,0x82
@@ -184,30 +188,32 @@
     pop {r0-r2}
     mov r4,r0
   .endif
-  b SUBTITLE_RETURN
+  pop {pc}
   .pool
 
   .if SECOND_GAME
     SUBTITLE_RAM:
+    push {lr}
     ldr r2,=SUB_RAM
     ldr r2,[r2]
     cmp r2,0x0
     movne r2,0x8c0
     bne SUBTITLE_RAM_RETURN
     ldr r2,=0xfffff
-    b SUBTITLE_RAM_RETURN
+    pop {pc}
     .pool
   .endif
 
   ;Draw or clear the subtitles at the current frame
   SUBTITLE_FRAME:
+  push {lr}
   push {r0-r3}
   ;Check if we need to do something in the current frame (r1)
   ldr r0,=SUB_RAM
   ldr r2,[r0]
   ldr r3,[r0,r2]
   cmp r1,r3
-  bne SUBTITLE_END
+  bne @@end
   ;Push the rest of the registers and get current offset/clear
   push {r4-r11}
   add r2,r2,0x4
@@ -221,42 +227,42 @@
   ;Check the compression series
   ;If r3 1, this is a repeating series with one single tile repeated r2 times
   ;Otherwise, there are r2 different tiles
-  SUBTITLE_SERIES:
+  @@series:
   ldrh r3,[r0],0x2
   ldrh r2,[r0],0x2
   cmp r2,0x0
-  beq SUBTITLE_SERIES_END
+  beq @@seriesEnd
   ;Multiply by 2 since 8 words are copied at a time and a tile is 16 words
   lsl r3,r3,0x1
   lsl r2,r2,0x1
   ;Copy 8 words at a time
-  SUBTITLE_LOOP:
+  @@loop:
   ldmia r0!,{r4-r11}
   stmia r1!,{r4-r11}
   sub r2,r2,0x1
   cmp r2,0x0
-  beq SUBTITLE_SERIES
+  beq @@series
   ;Go back to the loop if this isn't a repating series
   cmp r3,0x0
-  beq SUBTITLE_LOOP
+  beq @@loop
   ;Otherwise, check if it needs to go back one tile in RAM and write it again
   sub r3,r3,0x1
   cmp r3,0x0
   moveq r3,0x2
   subeq r0,r0,0x40
-  b SUBTITLE_LOOP
+  b @@loop
   ;Pop the registers
-  SUBTITLE_SERIES_END:
+  @@seriesEnd:
   pop {r4-r11}
   ;Go back to normal execution
-  SUBTITLE_END:
+  @@end:
   pop {r0-r3}
   .if FIRST_GAME
     ldr r0,[r10,0x8]
   .else
     add r1,r1,0x1
   .endif
-  b SUBTITLE_FRAME_RETURN
+  pop {pc}
   .pool
 .close
 
@@ -265,37 +271,30 @@
   .if FIRST_GAME
     .org 0x0203a8ec
       ;Original: add r0,r0,0x6
-      b VWF
-      VWF_RETURN:
+      bl VWF
     .org 0x02030304
       ;Original: add r1,r6,r6,lsl 0x1
-      b CENTERING
-      CENTERING_RETURN:
+      bl CENTERING
     .org 0x020216d0
       ;Original: add r0,r6,0x1000
-      b SUBTITLE
-      SUBTITLE_RETURN:
+      bl SUBTITLE
     .org 0x0206ba2c
       ;Original: ldr r0,[r10,0x8]
-      b SUBTITLE_FRAME
-      SUBTITLE_FRAME_RETURN:
+      bl SUBTITLE_FRAME
     ;Increase space for the market header
     .org 0x020450dc
       ;Original: mov r3,0x19
       mov r3,0x20
   .else
-    ;TODO: VWF_HACK hack
+    ;TODO: VWF hack
     .org 0x0209d1c4
       ;Original: mov r4,r0
-      b SUBTITLE
-      SUBTITLE_RETURN:
+      bl SUBTITLE
     .org 0x02098854
       ;Original: mov r2,0x8c0
-      b SUBTITLE_RAM
-      SUBTITLE_RAM_RETURN:
+      bl SUBTITLE_RAM
     .org 0x0209f1e0
       ;Original: add r1,r1,0x1
-      b SUBTITLE_FRAME
-      SUBTITLE_FRAME_RETURN:
+      bl SUBTITLE_FRAME
   .endif
 .close
