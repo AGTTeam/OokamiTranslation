@@ -83,6 +83,13 @@ def repack(no_rom, bin, dat, img, wsb, sub, force):
         nds.repackRom(romf, romp, outfolder, patchfile)
 
 
+@common.cli.command()
+def patchdump():
+    patchfile = "data/bad_to_good.xdelta"
+    ndsfile = romfile if os.path.isfile(romfile) else romfile.replace("holo", "holo2")
+    common.xdeltaPatch(patchfile, ndsfile.replace(".nds", "_bad.nds"), ndsfile)
+
+
 if __name__ == "__main__":
     click.echo("OokamiTranslation version " + version)
     if not os.path.isdir("data"):
