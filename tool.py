@@ -98,9 +98,9 @@ def dupe():
         for line in sections[section]:
             translation = sections[section][line][0]
             if line not in seen:
-                seen[line] = translation + " @" + section
-            elif translation != seen[line]:
-                common.logMessage(section + ": " + line + "=" + translation + " (" + seen[line] + ")")
+                seen[line] = (translation, section)
+            elif translation != seen[line][0]:
+                common.logMessage("{}: {}={} ({} @{})".format(section, line, translation, seen[line][0], seen[line][1]))
 
 
 if __name__ == "__main__":
