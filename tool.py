@@ -90,6 +90,19 @@ def patchdump():
     common.xdeltaPatch(patchfile, ndsfile.replace(".nds", "_bad.nds"), ndsfile)
 
 
+@common.cli.command()
+def dupe():
+    seen = {}
+    sections = common.getSections("data/wsb_input.txt", fixchars=game.fixchars)
+    for section in sections:
+        for line in sections[section]:
+            translation = sections[section][line][0]
+            if line not in seen:
+                seen[line] = translation + " @" + section
+            elif translation != seen[line]:
+                common.logMessage(section + ": " + line + "=" + translation + " (" + seen[line] + ")")
+
+
 if __name__ == "__main__":
     click.echo("OokamiTranslation version " + version)
     if not os.path.isdir("data"):
