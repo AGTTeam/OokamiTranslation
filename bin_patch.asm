@@ -270,31 +270,43 @@
 .open ARM_FILE,0x02000000
   .if FIRST_GAME
     .org 0x0203a8ec
-      ;Original: add r0,r0,0x6
+      ;add r0,r0,0x6
       bl VWF
     .org 0x02030304
-      ;Original: add r1,r6,r6,lsl 0x1
+      ;add r1,r6,r6,lsl 0x1
       bl CENTERING
     .org 0x020216d0
-      ;Original: add r0,r6,0x1000
+      ;add r0,r6,0x1000
       bl SUBTITLE
     .org 0x0206ba2c
-      ;Original: ldr r0,[r10,0x8]
+      ;ldr r0,[r10,0x8]
       bl SUBTITLE_FRAME
+
     ;Increase space for the market header
     .org 0x020450dc
-      ;Original: mov r3,0x19
+      ;mov r3,0x19
       mov r3,0x20
+
+    ;Tweak rumor text position
+    .org 0x0206cca4
+      ;mov r2,r1 (0x8)
+      mov r2,0x6
+    .org 0x0206cd6c
+      ;mov r2,0x1c
+      mov r2,0x16
+    .org 0x0206ce94
+      ;mov r2,0x70
+      mov r2,0x72
   .else
     ;TODO: VWF hack
     .org 0x0209d1c4
-      ;Original: mov r4,r0
+      ;mov r4,r0
       bl SUBTITLE
     .org 0x02098854
-      ;Original: mov r2,0x8c0
+      ;mov r2,0x8c0
       bl SUBTITLE_RAM
     .org 0x0209f1e0
-      ;Original: add r1,r1,0x1
+      ;add r1,r1,0x1
       bl SUBTITLE_FRAME
   .endif
 .close
