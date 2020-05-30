@@ -12,8 +12,11 @@
   INJECT_END   equ 0x02121f70
   ;Free portion of RAM to load the opening sub graphics
   SUB_RAM      equ 0x020a9000
+  SUB_OP_SIZE  equ 0x9A00
   ;Bottom screen BG VRAM + 1 tile of space (0x800)
   SUB_VRAM     equ 0x06204800
+  ;Position for the Special Message subs
+  SUB_VRAM2    equ 0x06214800
   ;Function to load a file in RAM
   RAM_FUNC     equ 0x0205464c
 .else
@@ -116,12 +119,15 @@
 
   ;File containing the the opening sub graphics
   SUB_FILE:
-  .ascii SUB_PATH
+  .asciiz SUB_PATH
+  ;Current frame for audio subtitles
+  AUDIO_FRAME:
+  .dh 0x0
   .align
 
   ;Load the subtitles file in ram
   SUBTITLE:
-  push {lr}
+  push {lr,r0-r2}
   .if FIRST_GAME
     ;This functions loads the file r1 into r0+0xc, but only up
     ;to 0xa78 bytes, so we temporarily modify that max size
@@ -129,8 +135,6 @@
     ldr r0,=SUB_SIZE
     ldr r1,=0xfffff
     str r1,[r0]
-  .else
-    push {r0-r2}
   .endif
   ;Load the file
   ldr r0,=SUB_RAM
@@ -142,30 +146,35 @@
     ldr r0,=SUB_SIZE
     ldr r1,=0xa78
     str r1,[r0]
-    ;Go back to normal execution
-    add r0,r6,0x1000
-  .else
-    ;Enable BG1
-    ldr r0,=0x4001001
-    mov r1,0x3
-    strb r1,[r0]
-    ;Set BG1 values (High priority, 8bit, tiles=5, map=2)
-    add r0,r0,0x9
-    mov r1,0x0294
-    strh r1,[r0]
-    ;Reset BG1 scrolling, needed if the video plays again
-    ;after being idle in the main menu
-    add r0,r0,0xc
-    mov r1,0x0
-    strh r1,[r0]
-    ;Set the map
-    ldr r0,=0x6201000
-    mov r1,0x0
-    @@mapLoop:
-    strh r1,[r0],0x2
-    add r1,0x1
-    cmp r1,0x60
-    bne @@mapLoop
+    ;Check if we need to enable the BG
+    ldr r0,=AUDIO_FRAME
+    ldrh r0,[r0]
+    cmp r0,0x0
+    beq @@ret
+  .endif
+  ;Enable BG1 (2nd bit)
+  ldr r0,=0x4001001
+  ldrb r1,[r0]
+  orr r1,r1,0x2
+  strb r1,[r0]
+  ;Set BG1 values (High priority, 8bit, tiles=5, map=2)
+  add r0,r0,0x9
+  mov r1,0x0294
+  strh r1,[r0]
+  ;Reset BG1 scrolling, needed if the video plays again
+  ;after being idle in the main menu
+  add r0,r0,0xc
+  mov r1,0x0
+  strh r1,[r0]
+  ;Set the map
+  ldr r0,=0x6201000
+  mov r1,0x0
+  @@mapLoop:
+  strh r1,[r0],0x2
+  add r1,0x1
+  cmp r1,0x60
+  bne @@mapLoop
+  .if SECOND_GAME
     ;Set VRAM H to LCD
     ldr r0,=0x04000248
     mov r1,0x80
@@ -184,8 +193,13 @@
     ldr r0,=0x04000248
     mov r1,0x82
     strb r1,[r0]
-    ;Go back to normal execution
-    pop {r0-r2}
+  .endif
+  ;Go back to normal execution
+  @@ret:
+  pop {r0-r2}
+  .if FIRST_GAME
+    add r0,r6,0x1000
+  .else
     mov r4,r0
   .endif
   pop {pc}
@@ -198,7 +212,7 @@
     ldr r2,[r2]
     cmp r2,0x0
     movne r2,0x8c0
-    bne SUBTITLE_RAM_RETURN
+    popne {pc}
     ldr r2,=0xfffff
     pop {pc}
     .pool
@@ -206,10 +220,15 @@
 
   ;Draw or clear the subtitles at the current frame
   SUBTITLE_FRAME:
-  push {lr}
-  push {r0-r3}
+  push {lr,r0-r3}
   ;Check if we need to do something in the current frame (r1)
   ldr r0,=SUB_RAM
+  .if FIRST_GAME
+    ldr r2,=AUDIO_FRAME
+    ldrh r2,[r2]
+    cmp r2,0x0
+    addne r0,r0,SUB_OP_SIZE
+  .endif
   ldr r2,[r0]
   ldr r3,[r0,r2]
   cmp r1,r3
@@ -222,7 +241,15 @@
   add r2,r2,0x4
   str r2,[r0]
   ;Setup registers
-  ldr r1,=SUB_VRAM
+  .if FIRST_GAME
+    ldr r1,=AUDIO_FRAME
+    ldrh r1,[r1]
+    cmp r1,0x0
+    ldreq r1,=SUB_VRAM
+    ldrne r1,=SUB_VRAM2
+  .else
+    ldr r1,=SUB_VRAM
+  .endif
   add r0,r0,r3
   ;Check the compression series
   ;If r3 1, this is a repeating series with one single tile repeated r2 times
@@ -264,6 +291,55 @@
   .endif
   pop {pc}
   .pool
+
+  ;Add subtitles for the special message
+  .if FIRST_GAME
+    SPECIAL_NAME:
+    .asciiz "HOR_SYS_420.ahx"
+    .align
+
+    SPECIAL:
+    push {lr,r0-r2,r4}
+    ;Compare r3 with HOR_SYS_420.ahx
+    ldr r0,=SPECIAL_NAME
+    mov r1,0x0
+    @@loop:
+    ldrb r2,[r0,r1]
+    ldrb r4,[r3,r1]
+    cmp r2,r4
+    bne @@end
+    cmp r2,0x0
+    beq @@found
+    add r1,r1,0x1
+    b @@loop
+    ;Matched, load the subtitle file in ram
+    @@found:
+    ldr r0,=AUDIO_FRAME
+    mov r1,0x1
+    strh r1,[r0]
+    bl SUBTITLE
+    ;Restore the stack and jump to the original function call
+    @@end:
+    pop {lr,r0-r2,r4}
+    b 0x2069774
+    .pool
+
+    SPECIAL_FRAME:
+    push {lr,r0-r1}
+    ;Check if the special message is playing
+    ldr r0,=AUDIO_FRAME
+    ldrh r1,[r0]
+    cmp r1,0x0
+    beq @@ret
+    ;Increase the frame and call the frame function
+    add r1,r1,0x1
+    strh r1,[r0]
+    bl SUBTITLE_FRAME
+    @@ret:
+    pop {lr,r0-r1}
+    b 0x0205818c
+    .pool
+  .endif
 .close
 
 ;Inject custom code
@@ -281,6 +357,12 @@
     .org 0x0206ba2c
       ;ldr r0,[r10,0x8]
       bl SUBTITLE_FRAME
+    .org 0x02055b64
+      ;bl 0x2069774
+      bl SPECIAL
+    .org 0x020582b0
+      ;bl 0x0205818c
+      bl SPECIAL_FRAME
 
     ;Increase space for the market header
     .org 0x020450dc

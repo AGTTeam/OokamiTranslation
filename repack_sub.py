@@ -9,6 +9,7 @@ def run(firstgame):
     subin = "data/opening.ass"
     subfile = "data/repack/data/data/opsub.dat"
     fontfile = "data/replace/data/font/lcfont12.NFTR"
+    textcolor = "#480818"
     if firstgame:
         palfile = "data/extract/data/graphic/title/logo.NCLR"
         bgcolor = "#F8F8F8"
@@ -17,7 +18,25 @@ def run(firstgame):
         palfile = "data/extract/data/graphics/systemmenu/BottomBG.NCLR"
         bgcolor = "transparent"
         addframes = 10
+    createSubdata(subin, subfile, fontfile, palfile, textcolor, bgcolor, addframes)
+    # Create one more file for the special message subs
+    if firstgame:
+        subin = "data/special_message.ass"
+        subfile2 = "data/repack/data/data/opsub2.dat"
+        palfile = "data/extract/data/graphic/kaiwa/logo.NCLR"
+        textcolor = "#803040"
+        bgcolor = "transparent"
+        addframes = 2
+        createSubdata(subin, subfile2, fontfile, palfile, textcolor, bgcolor, addframes, 60)
+        # Merge the 2 files
+        with common.Stream(subfile, "r+b") as f:
+            with common.Stream(subfile2, "rb") as fin:
+                f.seek(0, 2)
+                f.write(fin.read())
+        os.remove(subfile2)
 
+
+def createSubdata(subin, subfile, fontfile, palfile, textcolor, bgcolor, addframes, fps=30):
     if not os.path.isfile(subin):
         common.logError("Input file", subin, "not found")
         return
@@ -25,21 +44,21 @@ def run(firstgame):
     if not os.path.isfile(fontfile):
         fontfile = fontfile.replace("/replace", "/extract")
 
-    common.logMessage("Generating OP subs from", subin, "...")
+    common.logMessage("Generating subs from", subin, "...")
     # Read the sub lines and timecodes
     subdata = []
     text = ""
     with codecs.open(subin, "r", "utf-8-sig") as f:
         doc = ass.parse(f)
     for event in doc.events:
-        linestart = common.deltaToFrame(event.start) + addframes
-        lineend = common.deltaToFrame(event.end) + addframes
+        linestart = common.deltaToFrame(event.start, fps) + addframes
+        lineend = common.deltaToFrame(event.end, fps) + addframes
         subdata.append({"start": linestart, "end": lineend, "pos": 0})
         text += event.text.strip() + "\n"
     text = text.strip()
     sublen = len(subdata)
     # Create the sub image
-    img = ndstextgen.gen(fontfile, text, out="", vert=5, color="#480818", bg=bgcolor, no_crop=True, center=True, height=sublen * 16)
+    img = ndstextgen.gen(fontfile, text, out="", vert=5, color=textcolor, bg=bgcolor, no_crop=True, center=True, height=sublen * 16)
     # Read the palette and create some dummy ncgr data
     palette = nitro.readNCLR(palfile)[0]
     ncgr = nitro.NCGR()
