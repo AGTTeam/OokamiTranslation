@@ -343,6 +343,26 @@
     pop {lr,r0-r1}
     b 0x0205818c
     .pool
+
+    SPECIAL_STOP:
+    push {r0-r1}
+    ;Check if the special message is playing
+    ldr r0,=AUDIO_FRAME
+    ldrh r1,[r0]
+    cmp r1,0x0
+    beq @@ret
+    ;Set audio frame to 0
+    mov r1,0x0
+    strh r1,[r0]
+    ;Disable BG1 (2nd bit)
+    ldr r0,=0x4001001
+    ldrb r1,[r0]
+    and r1,r1,0xfd
+    strb r1,[r0]
+    @@ret:
+    pop {r0-r1}
+    b 0x020664d4
+    .pool
   .endif
 .close
 
@@ -367,6 +387,9 @@
     .org 0x020582b0
       ;bl 0x0205818c
       bl SPECIAL_FRAME
+    .org 0x02069698
+      ;bl 0x020664d4
+      bl SPECIAL_STOP
 
     ;Increase space for the market header
     .org 0x020450dc
