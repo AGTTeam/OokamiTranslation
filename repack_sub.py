@@ -24,7 +24,6 @@ def run(firstgame):
         subin = "data/special_message.ass"
         subfile2 = "data/repack/data/data/opsub2.dat"
         palfile = "data/extract/data/graphic/kaiwa/logo.NCLR"
-        textcolor = "#803040"
         bgcolor = "transparent"
         addframes = 2
         createSubdata(subin, subfile2, fontfile, palfile, textcolor, bgcolor, addframes, 60)

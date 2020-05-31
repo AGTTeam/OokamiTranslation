@@ -174,14 +174,18 @@
   add r1,0x1
   cmp r1,0x60
   bne @@mapLoop
-  .if SECOND_GAME
-    ;Set VRAM H to LCD
-    ldr r0,=0x04000248
-    mov r1,0x80
-    strb r1,[r0]
+  ;Set VRAM H to LCD
+  ldr r0,=0x04000248
+  mov r1,0x80
+  strb r1,[r0]
+  .if FIRST_GAME
+    ldr r0,=0x0689a002
+    ldr r1,=0x63df
+    strh r1,[r0]
+  .else
     ;Copy the palette
     ldr r0,=0x06898000
-    ldr r1,=0x0689A000
+    ldr r1,=0x0689a000
     mov r2,0x80
     @@palLoop:
     ldr r4,[r0],0x4
@@ -189,11 +193,11 @@
     sub r2,r2,0x1
     cmp r2,0x0
     bne @@palLoop
-    ;Set VRAM H back to ext palette
-    ldr r0,=0x04000248
-    mov r1,0x82
-    strb r1,[r0]
   .endif
+  ;Set VRAM H back to ext palette
+  ldr r0,=0x04000248
+  mov r1,0x82
+  strb r1,[r0]
   ;Go back to normal execution
   @@ret:
   pop {r0-r2}
