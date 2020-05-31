@@ -49,11 +49,16 @@ def run(firstgame):
                                 common.logDebug("Replacing string at", pos)
                                 f.seek(pos)
                                 newsjis = section[check][0]
+                                maxlen = 0
                                 if file == "goods.dat":
                                     newsjis = common.wordwrap(newsjis, glyphs, 170)
                                 elif file == "gossip.dat":
                                     newsjis = common.wordwrap(newsjis, glyphs, 190)
-                                game.writeShiftJIS(f, newsjis, False, True, 0, encoding)
+                                elif file == "entrance_icon.dat":
+                                    maxlen = fin.tell() - pos
+                                newlen = game.writeShiftJIS(f, newsjis, False, True, maxlen, encoding)
+                                if newlen < 0:
+                                    common.logError("String {} is too long ({}/{}).".format(newsjis, len(newsjis), maxlen))
                                 # Pad with 0s if the line is shorter
                                 while f.tell() < fin.tell():
                                     f.writeByte(0x00)
