@@ -67,6 +67,9 @@ def run(firstgame):
                                         # Disable wordwrap for strings that contain replace codes
                                         if newsjis.count("@<") > 0:
                                             sjissplit[i] = newsjis
+                                        # Check for automatic centering
+                                        elif newsjis.count("<<") > 0:
+                                            sjissplit[i] = common.centerLines(newsjis, glyphs, 205, centercode="<<")
                                         else:
                                             sjissplit[i] = common.wordwrap(newsjis, glyphs, 205)
                                 newsjis = ">>".join(sjissplit)
