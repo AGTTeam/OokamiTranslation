@@ -392,6 +392,9 @@
       bl SPECIAL_STOP
 
     ;Increase space for the market header
+    .org 0x0204500c
+      ;mov r3,0x19
+      mov r3,0x20
     .org 0x020450dc
       ;mov r3,0x19
       mov r3,0x20
