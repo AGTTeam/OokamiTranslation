@@ -36,7 +36,7 @@
 .org INJECT_END
   ;Copy the relevant info from the font file
   FONT_DATA:
-  .import "data/font_data.bin",0,0x5E
+  .import "data/font_data.bin",0,0x5f
   .align
 
   ;Add WVF support to script dialogs
