@@ -75,6 +75,10 @@ def run(firstgame):
                                         newsjis = common.wordwrap(newsjis, glyphs, 170)
                                     elif file == "gossip.dat":
                                         newsjis = common.wordwrap(newsjis, glyphs, 190)
+                                        if fin.tell() - pos < 35:
+                                            maxlen = 35
+                                        else:
+                                            maxlen = 160
                                     newlen = game.writeShiftJIS(f, newsjis, False, True, maxlen, encoding)
                                     if newlen < 0:
                                         common.logError("String {} is too long ({}/{}).".format(newsjis, len(newsjis), maxlen))
