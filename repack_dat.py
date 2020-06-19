@@ -8,6 +8,7 @@ def run(firstgame):
     infolder = "data/extract/data/data/"
     outfolder = "data/repack/data/data/"
     infile = "data/dat_input.txt"
+    redfile = "data/redirects.asm"
     fontfile = "data/replace/data/font/lcfont12.NFTR"
     if not os.path.isfile(infile):
         common.logError("Input file", infile, "not found")
@@ -24,6 +25,7 @@ def run(firstgame):
     # Copy this txt file
     if not firstgame and os.path.isfile(infolder + "facilityhelp.txt"):
         common.copyFile(infolder + "facilityhelp.txt", outfolder + "facilityhelp.txt")
+    redirects = []
     with codecs.open(infile, "r", "utf-8") as dat:
         files = common.getFiles(infolder, ".dat")
         for file in common.showProgress(files):
@@ -81,10 +83,29 @@ def run(firstgame):
                                             maxlen = 160
                                     newlen = game.writeShiftJIS(f, newsjis, False, True, maxlen, encoding)
                                     if newlen < 0:
-                                        common.logError("String {} is too long ({}/{}).".format(newsjis, len(newsjis), maxlen))
+                                        if file != "gossip.dat":
+                                            common.logError("String {} is too long ({}/{}).".format(newsjis, len(newsjis), maxlen))
+                                        else:
+                                            common.logWarning("String {} is too long ({}/{}).".format(newsjis, len(newsjis), maxlen))
+                                            # Doesn't fit, write it shorter
+                                            f.seek(pos)
+                                            stringfit = newsjis[:155]
+                                            stringrest = newsjis[155:]
+                                            game.writeShiftJIS(f, stringfit, False, True, maxlen, encoding)
+                                            f.seek(-1, 1)
+                                            f.writeByte(0x1f)
+                                            f.writeByte(len(redirects))
+                                            redirects.append(stringrest)
                                     # Pad with 0s if the line is shorter
                                     while f.tell() < fin.tell():
                                         f.writeByte(0x00)
                             pos = fin.tell() - 1
                         fin.seek(pos + 1)
+    with codecs.open(redfile, "w", "utf-8") as f:
+        f.write("REDIRECT_START:\n\n")
+        for i in range(len(redirects)):
+            f.write(".dh REDIRECT_{} - REDIRECT_START\n".format(i))
+        for i in range(len(redirects)):
+            f.write("\nREDIRECT_{}:\n".format(i))
+            f.write(".ascii \"{}\" :: .db 0\n".format(redirects[i].replace("|", "\" :: .db 0xa :: .ascii \"")))
     common.logMessage("Done! Translation is at {0:.2f}%".format((100 * transtot) / chartot))

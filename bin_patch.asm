@@ -39,6 +39,12 @@
   .import "data/font_data.bin",0,0x5f
   .align
 
+  .if FIRST_GAME
+  .include "data/redirects.asm"
+  .align
+  .endif
+
+
   ;Add WVF support to script dialogs
   VWF:
   push {lr}
@@ -296,6 +302,31 @@
   pop {pc}
   .pool
 
+  .if FIRST_GAME
+    GOSSIP:
+    beq GOSSIP_ZERO
+    cmp r0,0x1f
+    bne GOSSIP_LOOP
+    ;Set r1 to REDIRECT_START + redirectn*2
+    ldrb r0,[r1,0x0]
+    lsl r0,r0,0x1
+    ldr r1,=REDIRECT_START
+    ;ldr r1,[r1]
+    add r1,r1,r0
+    ;Set r1 to the redirected string
+    ldrh r0,[r1]
+    ldr r1,=REDIRECT_START
+    add r1,r1,r0
+    ;Set r0 to the next character and increase r1 by 1
+    ldrb r0,[r1,0x0]
+    add r1,r1,0x1
+    ;Write it to [r13+0xc]
+    str r1,[r13,0xc]
+    ;Go back to normal execution
+    b GOSSIP_LOOP
+    .pool
+  .endif
+
   ;Add subtitles for the special message
   .if FIRST_GAME
     SPECIAL_NAME:
@@ -363,6 +394,7 @@
     pop {r0-r1}
     b 0x020664d4
     .pool
+
   .endif
 .close
 
@@ -390,6 +422,11 @@
     .org 0x02069698
       ;bl 0x020664d4
       bl SPECIAL_STOP
+    .org 0x0207b9bc
+      b GOSSIP
+      GOSSIP_ZERO:
+    .org 0x0207b97c
+      GOSSIP_LOOP:
 
     ;Increase space for the market header
     .org 0x0204500c
