@@ -107,5 +107,5 @@ def run(firstgame):
             f.write(".dh REDIRECT_{} - REDIRECT_START\n".format(i))
         for i in range(len(redirects)):
             f.write("\nREDIRECT_{}:\n".format(i))
-            f.write(".ascii \"{}\" :: .db 0\n".format(redirects[i].replace("|", "\" :: .db 0xa :: .ascii \"")))
+            f.write(".ascii \"{}\" :: .db 0\n".format(redirects[i].replace("\"", "\\\"").replace("|", "\" :: .db 0xa :: .ascii \"")))
     common.logMessage("Done! Translation is at {0:.2f}%".format((100 * transtot) / chartot))
