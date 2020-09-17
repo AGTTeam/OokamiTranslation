@@ -29,7 +29,7 @@ wsbcodes = {
 # Identifiers of WSB code blocks containing a pointer
 wsbpointers = [(0xCA, 0x00), (0xCB, 0x00), (0xCC, 0x00), (0xCD, 0x00), (0xCE, 0x00), (0xCF, 0x00), (0xD0, 0x00), (0xD7, 0x00)]
 # Characters to replace when reading a section
-fixchars = [("’", "'"), ("“", "\""), ("”", "\"")]
+fixchars = [("’", "'"), ("“", "\""), ("”", "{"), ("‘", "}")]
 
 
 # Game-specific string
