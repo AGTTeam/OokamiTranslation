@@ -52,6 +52,11 @@ def run(firstgame):
                         f.writeByte(b2)
                         if (b1 == 0x55 and b2 == 0x08) or (b1 == 0x95 and b2 == 0x10):
                             sjis, oldlen = game.readShiftJIS(fin, b1 == 0x95, False, encoding)
+                            # Fix a bugged line with wrong speaker code
+                            if file == "event/ev_mou/mou_10.wsb" and sjis == "そうじゃな。|わっちの直感が申すには……>>":
+                                f.seek(fpos - 12)
+                                f.writeByte(0x53)
+                                f.seek(fpos + 2)
                             strreplaced = False
                             if sjis != "" and sjis != ">>":
                                 sjissplit = sjis.split(">>")
