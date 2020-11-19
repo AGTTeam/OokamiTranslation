@@ -396,6 +396,26 @@
     .pool
 
   .endif
+
+  .if FIRST_GAME
+    ;Tweak Knowledge level increased text position
+    ;Currently disabled since the text doesn't get cleaned up by other message boxes
+    ;KNOWLEDGE_LEVEL:
+    ;push {lr,r0,r1}
+    ;Change the bytecode of the function "mov r2,0x19" to "mov r2,0x13"
+    ;ldr r0,=0x02049ef0
+    ;mov r1,0x13
+    ;strb r1,[r0]
+    ;pop {r0,r1}
+    ;Call the original function
+    ;bl 0x02049560
+    ;Change it back
+    ;ldr r0,=0x02049ef0
+    ;mov r1,0x19
+    ;strb r1,[r0]
+    ;pop {pc}
+    ;.pool
+  .endif
 .close
 
 ;Inject custom code
@@ -427,6 +447,11 @@
       GOSSIP_ZERO:
     .org 0x0207b97c
       GOSSIP_LOOP:
+    ;.org 0x02044e44
+    ;  bl KNOWLEDGE_LEVEL
+    .org 0x02048790
+      ;mov r3,0x19
+      mov r3,0x14
 
     ;Increase space for the market header
     .org 0x0204500c
