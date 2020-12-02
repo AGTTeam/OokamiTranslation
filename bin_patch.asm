@@ -123,6 +123,58 @@
   pop {pc}
   .pool
 
+  ;Center the speaker name.
+  ;This function originally just counts the character (/2 for ASCII)
+  CENTERING_NAME:
+  push {lr}
+  .if FIRST_GAME
+    ;r0 = Result and pointer to the string
+    push {r1,r2,r3}
+    ldr r1,=FONT_DATA
+    mov r3,r0
+    mov r0,0x0
+    ;Loop the name characters
+    @@loop:
+    ;Read the character
+    ldrb r2,[r3],0x1
+    add r3,r3,0x1
+    ;Finish when reaching 0
+    cmp r2,0x0
+    beq @@end
+    ;Handle shift-jis
+    ;>=0xe0
+    cmp r2,0xe0
+    addge r0,r0,0xc
+    addge r3,r3,0x1
+    bge @@loop
+    ;>0xa0
+    cmp r2,0xa0
+    addgt r0,r0,0x6
+    bgt @@loop
+    ;>=0x81
+    cmp r2,0x81
+    addge r0,r0,0xc
+    addge r3,r3,0x1
+    bge @@loop
+    ;Add the character width
+    sub r2,r2,0x20
+    add r2,r1,r2
+    ldrb r2,[r2]
+    add r0,r0,r2
+    b @@loop
+    @@end:
+    ;Divide by 3: ((x * 0xaaab) >> 0x10) >> 0x1
+    ldr r1,=0xaaab
+    mul r0,r0,r1
+    lsr r0,r0,0x10
+    lsr r0,r0,0x1
+    pop {r1,r2,r3}
+  .else
+    ;TODO
+  .endif
+  pop {pc}
+  .pool
+
   ;File containing the the opening sub graphics
   SUB_FILE:
   .asciiz SUB_PATH
@@ -407,6 +459,9 @@
     .org 0x02030304
       ;add r1,r6,r6,lsl 0x1
       bl CENTERING
+    .org 0x0203a6e4
+      ;bl 0x0200cffc
+      bl CENTERING_NAME
     .org 0x020216d0
       ;add r0,r6,0x1000
       bl SUBTITLE
