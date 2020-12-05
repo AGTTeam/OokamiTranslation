@@ -20,7 +20,7 @@ New textboxes can be added by appending `>>` followed by the new text.
 Lines can be automatically centered by putting a `<<` at the beginning of the line.  
 Control codes are specified as \<XX\> or UNK(XXXX), they should usually be kept.  
 To blank out a line, use a single `!`. If just left empty, the line will be left untranslated.  
-Comments can be added at the end of lines by using #  
+Comments can be added at the end of lines by using `#`  
 ## Image Editing
 Rename the out\_\* folders to work\_\* (out_IMG to work_IMG, etc).  
 Edit the images in the work folder(s). The palette on the right should be followed but the repacker will try to approximate other colors to the closest one.  
