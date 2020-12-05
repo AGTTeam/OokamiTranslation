@@ -18,7 +18,7 @@ Rename the \*\_output.txt files to \*\_input.txt (bin_output.txt to bin_input.tx
 The text in wsb_input is automatically wordwrapped, but a `|` can be used to force a line break.  
 New textboxes can be added by appending `>>` followed by the new text.  
 Lines can be automatically centered by putting a `<<` at the beginning of the line.  
-Control codes are specified as \<XX\> or UNK(XXXX), they should usually be kept.  
+Control codes are specified as `<XX>` or `UNK(XXXX)`, they should usually be kept.  
 To blank out a line, use a single `!`. If just left empty, the line will be left untranslated.  
 Comments can be added at the end of lines by using `#`  
 ## Image Editing
