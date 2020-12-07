@@ -137,7 +137,6 @@
     @@loop:
     ;Read the character
     ldrb r2,[r3],0x1
-    add r3,r3,0x1
     ;Finish when reaching 0
     cmp r2,0x0
     beq @@end
@@ -163,11 +162,11 @@
     add r0,r0,r2
     b @@loop
     @@end:
-    ;Divide by 3: ((x * 0xaaab) >> 0x10) >> 0x1
+    ;Divide by 6: ((x * 0xaaab) >> 0x10) >> 0x2
     ldr r1,=0xaaab
     mul r0,r0,r1
     lsr r0,r0,0x10
-    lsr r0,r0,0x1
+    lsr r0,r0,0x2
     pop {r1,r2,r3}
   .else
     ;TODO
