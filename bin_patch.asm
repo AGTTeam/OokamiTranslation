@@ -10,6 +10,8 @@
   INJECT_START equ 0x02121e60
   ;Position in RAM for the end of the file
   INJECT_END   equ 0x02121f70
+  ;Different position with Heap Shrink enabled (default) on nds-bootstrap
+  INJECT_END2  equ 0x02123774
   ;Free portion of RAM to load the opening sub graphics
   SUB_RAM      equ 0x020a9000
   SUB_OP_SIZE  equ 0x9A00
@@ -31,19 +33,22 @@
   RAM_FUNC     equ 0x02098828
 .endif
 
-;Plug the custom code at the end of the digit8 font
+;Plug the redirects code at the end of the digit8 font
 .open "data/repack/data/font/digit8.NFTR",INJECT_START
 .org INJECT_END
-  ;Copy the relevant info from the font file
-  FONT_DATA:
-  .import "data/font_data.bin",0,0x5f
-  .align
-
   .if FIRST_GAME
   .include "data/redirects.asm"
   .align
   .endif
+.close
 
+.open ARM_FILE,0x02000000
+.org 0x020997ac
+.area 0x7BF
+  ;Copy the relevant info from the font file
+  FONT_DATA:
+  .import "data/font_data.bin",0,0x5f
+  .align
 
   ;Add WVF support to script dialogs
   VWF:
@@ -358,25 +363,35 @@
     beq GOSSIP_ZERO
     cmp r0,0x1f
     bne GOSSIP_LOOP
+    push {r2}
+    ;Check that REDIRECT_START contains "NDSC" before it
+    ldr r0,=REDIRECT_START
+    ldr r0,[r0,-0x4]
+    ldr r2,=0x4353444e ;"CSDN"
+    cmp r0,r2
+    ldreq r2,=REDIRECT_START
+    ldrne r2,=INJECT_END2
     ;Set r1 to REDIRECT_START + redirectn*2
     ldrb r0,[r1,0x0]
     lsl r0,r0,0x1
-    ldr r1,=REDIRECT_START
+    mov r1,r2
     ;ldr r1,[r1]
     add r1,r1,r0
     ;Set r1 to the redirected string
     ldrh r0,[r1]
-    ldr r1,=REDIRECT_START
+    mov r1,r2
     add r1,r1,r0
     ;Set r0 to the next character and increase r1 by 1
     ldrb r0,[r1,0x0]
     add r1,r1,0x1
+    pop {r2}
     ;Write it to [r13+0xc]
     str r1,[r13,0xc]
     ;Go back to normal execution
     b GOSSIP_LOOP
     .pool
   .endif
+.endarea
 
   ;Add subtitles for the special message
   .if FIRST_GAME

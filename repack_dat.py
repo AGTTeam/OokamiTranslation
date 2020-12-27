@@ -102,6 +102,7 @@ def run(firstgame):
                             pos = fin.tell() - 1
                         fin.seek(pos + 1)
     with codecs.open(redfile, "w", "utf-8") as f:
+        f.write(".ascii \"NDSC\"\n\n")
         f.write("REDIRECT_START:\n\n")
         for i in range(len(redirects)):
             f.write(".dh REDIRECT_{} - REDIRECT_START\n".format(i))
