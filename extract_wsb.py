@@ -30,6 +30,8 @@ def run(firstgame, analyzefile):
             files = common.getFiles(infolder, ".wsb")
             for file in common.showProgress(files):
                 analyze = analyzefile != "" and file.endswith(analyzefile)
+                if analyzefile != "" and not analyze:
+                    continue
                 first = True
                 common.logDebug("Processing", file, "...")
                 with common.Stream(infolder + file, "rb") as f:

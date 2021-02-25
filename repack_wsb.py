@@ -36,6 +36,10 @@ def run(firstgame):
                     # Copy header
                     fin.seek(4)  # 0x10
                     codeoffset = fin.readUInt()
+                    if codeoffset == 0 and not firstgame:
+                        fin.seek(0)
+                        f.write(fin.read())
+                        continue
                     fin.seek(8, 1)  # all 0xFF
                     unk = fin.readUInt()
                     textoffset = fin.readUInt()

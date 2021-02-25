@@ -6,6 +6,9 @@
   SECOND_GAME  equ 0x0
   ARM_FILE     equ "data/repack/arm9.bin"
   SUB_PATH     equ "/data/opsub.dat"
+  ;Position in the ARM9 file for the custom code
+  ARM_POS      equ 0x020997ac
+  ARM_AREA     equ 0x7bf
   ;Position in RAM for the digit8 file used for injection
   INJECT_START equ 0x02121e60
   ;Position in RAM for the end of the file
@@ -26,8 +29,11 @@
   SECOND_GAME  equ 0x1
   ARM_FILE     equ "data/repack/arm9_dec.bin"
   SUB_PATH     equ "data/opsub.dat"
+  ARM_POS      equ 0x020c8178
+  ARM_AREA     equ 0x491
   INJECT_START equ 0x021962a0
   INJECT_END   equ 0x021963b0
+  INJECT_END2  equ 0x021963b0 ;TODO: check on nds-boostrap
   SUB_RAM      equ 0x023a7140
   SUB_VRAM     equ 0x06214800
   RAM_FUNC     equ 0x02098828
@@ -35,20 +41,22 @@
 
 ;Plug the redirects code at the end of the digit8 font
 .open "data/repack/data/font/digit8.NFTR",INJECT_START
-.org INJECT_END
-  .if FIRST_GAME
+  .org INJECT_END
   .include "data/redirects.asm"
   .align
-  .endif
 .close
 
 .open ARM_FILE,0x02000000
-.org 0x020997ac
-.area 0x7BF
+.org ARM_POS
+.area ARM_AREA
   ;Copy the relevant info from the font file
   FONT_DATA:
   .import "data/font_data.bin",0,0x5f
   .align
+  .if SECOND_GAME
+    CURRENT_VWF:
+    .dw 0x0
+  .endif
 
   ;Add WVF support to script dialogs
   VWF:
@@ -62,16 +70,42 @@
     ldrb r1,[r1]
     add r0,r0,r1
   .else
-    ;TODO
+    ;r4 = character
+    ;r3 = position in the string
+    ;r12 = return x position
+    push {r0-r1}
+    ;For sjis, we just add a fixed width
+    cmp r4,0x80
+    movge r1,0xc
+    bge @@skipascii
+    ;Add the character width
+    ldr r0,=FONT_DATA
+    add r0,r0,r4
+    sub r0,r0,0x20
+    ldrb r1,[r0]
+    @@skipascii:
+    ;Load the current x position from RAM
+    ldr r0,=CURRENT_VWF
+    ldr r12,[r0]
+    ;Reset it if this is the first character of the line
+    cmp r3,0x0
+    moveq r12,0x0
+    ;Save the new value in RAM
+    add r12,r12,r1
+    str r12,[r0]
+    ;Return the value minus the current character
+    sub r12,r1
+    ;Return
+    pop {r0-r1}
   .endif
   pop {pc}
   .pool
 
-  ;Center the choices text. This is originally calculated by
-  ;multiplying the max line length by a constant
-  CENTERING:
-  push {lr}
   .if FIRST_GAME
+    ;Center the choices text. This is originally calculated by
+    ;multiplying the max line length by a constant
+    CENTERING:
+    push {lr}
     ;r1 = Result
     ;r9 = Pointer to the string
     push {r0,r2,r3,r9}
@@ -122,17 +156,15 @@
     ;Divide by 2
     lsr r1,r1,0x1
     pop {r0,r2,r3,r9}
-  .else
-    ;TODO
+    pop {pc}
+    .pool
   .endif
-  pop {pc}
-  .pool
 
-  ;Center the speaker name.
-  ;This function originally just counts the character (/2 for ASCII)
-  CENTERING_NAME:
-  push {lr}
   .if FIRST_GAME
+    ;Center the speaker name.
+    ;This function originally just counts the character (/2 for ASCII)
+    CENTERING_NAME:
+    push {lr}
     ;r0 = Result and pointer to the string
     push {r1,r2,r3}
     ldr r1,=FONT_DATA
@@ -173,11 +205,9 @@
     lsr r0,r0,0x10
     lsr r0,r0,0x2
     pop {r1,r2,r3}
-  .else
-    ;TODO
+    pop {pc}
+    .pool
   .endif
-  pop {pc}
-  .pool
 
   ;File containing the the opening sub graphics
   SUB_FILE:
@@ -391,7 +421,6 @@
     b GOSSIP_LOOP
     .pool
   .endif
-.endarea
 
   ;Add subtitles for the special message
   .if FIRST_GAME
@@ -460,8 +489,8 @@
     pop {r0-r1}
     b 0x020664d4
     .pool
-
   .endif
+.endarea
 .close
 
 ;Inject custom code
@@ -516,7 +545,9 @@
       ;mov r2,0x70
       mov r2,0x72
   .else
-    ;TODO: VWF hack
+    .org 0x02030ef0
+      ;mul r12,r3,r1
+      bl VWF
     .org 0x0209d1c4
       ;mov r4,r0
       bl SUBTITLE
@@ -526,5 +557,10 @@
     .org 0x0209f1e0
       ;add r1,r1,0x1
       bl SUBTITLE_FRAME
+
+     ;Tweak starting position for dialog text
+     .org 0x02030f0c
+     ;add r2,r12,0xa
+     add r2,r12,0x4
   .endif
 .close

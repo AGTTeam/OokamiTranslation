@@ -3,7 +3,7 @@ import click
 import game
 from hacktools import common, nds, nitro
 
-version = "1.4.6"
+version = "1.5.0"
 romfile = "data/holo.nds"
 rompatch = "data/holo_patched.nds"
 headerfile = "data/extract/header.bin"
@@ -38,6 +38,9 @@ def extract(rom, bin, dat, img, wsb, analyze):
     if all or img:
         ncgrfolder = "data/extract/data/graphic/" if firstgame else "data/extract/data/graphics/"
         nitro.extractIMG(ncgrfolder, "data/out_IMG/", ".NCGR", game.readImage)
+        if not firstgame:
+            import extract_kbg
+            extract_kbg.run()
 
 
 @common.cli.command()
@@ -51,12 +54,12 @@ def extract(rom, bin, dat, img, wsb, analyze):
 def repack(no_rom, bin, dat, img, wsb, sub, force):
     all = not sub and not bin and not dat and not img and not wsb
     firstgame = nds.getHeaderID(headerfile) == "YU5J2J"
-    if all or dat:
-        import repack_dat
-        repack_dat.run(firstgame)
     if all or bin:
         import repack_bin
         repack_bin.run(firstgame)
+    if (all or dat) and firstgame:
+        import repack_dat
+        repack_dat.run(firstgame)
     if all or wsb:
         import repack_wsb
         repack_wsb.run(firstgame)
@@ -68,6 +71,9 @@ def repack(no_rom, bin, dat, img, wsb, sub, force):
         ncgrfolderin = ncgrfolder.replace("repack", "extract")
         common.copyFolder(ncgrfolderin, ncgrfolder)
         nitro.repackIMG("data/work_IMG/", ncgrfolderin, ncgrfolder, ".NCGR", game.readImage)
+        if not firstgame:
+            import repack_kbg
+            repack_kbg.run()
 
     if not no_rom:
         if os.path.isdir(replacefolder):
@@ -93,14 +99,19 @@ def patchdump():
 @common.cli.command()
 def dupe():
     seen = {}
-    sections = common.getSections("data/wsb_input.txt", fixchars=game.fixchars)
+    sections = common.getSections("data/wsb_output.txt")
     for section in sections:
         for line in sections[section]:
             translation = sections[section][line][0]
             if line not in seen:
-                seen[line] = (translation, section)
-            elif translation != seen[line][0]:
-                common.logMessage("{}: {}={} ({} @{})".format(section, line, translation, seen[line][0], seen[line][1]))
+                seen[line] = [translation, section, 1]
+            else:
+                seen[line][2] += 1
+                if translation != seen[line][0]:
+                    common.logMessage("{}: {}={} ({} @{})".format(section, line, translation, seen[line][0], seen[line][1]))
+    for line in seen:
+        if seen[line][2] > 2:
+            common.logMessage("Dupe", seen[line][2], line + "=")
 
 
 if __name__ == "__main__":

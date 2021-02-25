@@ -19,9 +19,13 @@ def run(firstgame):
     if firstgame:
         binrange = game.binrange[0]
         freeranges = game.freeranges[0]
+        game.monthsection = game.monthsection[0]
+        game.skipsection = game.skipsection[0]
     else:
         binrange = game.binrange[1]
         freeranges = game.freeranges[1]
+        game.monthsection = game.monthsection[1]
+        game.skipsection = game.skipsection[1]
         binin = binin.replace(".bin", "_dec.bin")
         binout = binout.replace(".bin", "_dec.bin")
 

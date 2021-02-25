@@ -7,7 +7,15 @@ binrange = [
 ]
 freeranges = [
     [(0x98ce4, 0x98e66), (0x98e74, 0x98ec7), (0x98ed4, 0x99303)],
-    None
+    [(0xc8648, 0xc8a70), (0xc8ab0, 0xc926d)]
+]
+monthsection = [
+    (0x97920, 0x9797f),
+    (0xc6bf4, 0xc6c50)
+]
+skipsection = [
+    (0x9791c, 0x9791f),
+    (0xc6bec, 0xc6bf3)
 ]
 # Identifier and size of WSB code blocks
 wsbcodes = {
@@ -24,7 +32,8 @@ wsbcodes = {
     (0x44, 0x09): 2,
     (0x45, 0x29): 2,
     (0x54, 0x09): 2, (0x54, 0x29): 2,
-    (0x16, 0x00): 0
+    (0x16, 0x00): 0,
+    (0x00, 0x00): 0,
 }
 # Identifiers of WSB code blocks containing a pointer
 wsbpointers = [(0xCA, 0x00), (0xCB, 0x00), (0xCC, 0x00), (0xCD, 0x00), (0xCE, 0x00), (0xCF, 0x00), (0xD0, 0x00), (0xD7, 0x00)]
@@ -167,14 +176,14 @@ def writeUNK(b1, b2):
 def detectShiftJIS(f, encoding="shift_jis"):
     ret = ""
     unk = 0
-    monthsection = f.tell() >= 0x97920 and f.tell() <= 0x9797f
+    ismonth = monthsection is not None and f.tell() >= monthsection[0] and f.tell() <= monthsection[1]
     while True:
-        if f.tell() >= 0x9791c and f.tell() <= 0x9791f:
+        if skipsection is not None and f.tell() >= skipsection[0] and f.tell() <= skipsection[1]:
             return ""
         b1 = f.readByte()
         if b1 == 0:
             return ret
-        if ((b1 >= 0x20 and b1 <= 0x7E) or b1 == 0x0A or b1 == 0xA5) and (len(ret) > 0 or chr(b1) == "%" or chr(b1) == "L" or monthsection):
+        if ((b1 >= 0x20 and b1 <= 0x7E) or b1 == 0x0A or b1 == 0xA5) and (len(ret) > 0 or chr(b1) == "%" or chr(b1) == "L" or ismonth):
             if b1 == 0xA5:
                 ret += "･"
             elif b1 == 0x0A:
@@ -215,3 +224,27 @@ def readImage(infolder, file, extension):
         width = image.width
         height = image.height
     return palettes, image, map, cell, width, height, mapfile, cellfile
+
+
+def readKBG(f):
+    # Read palette
+    pallen = 0x200
+    colornum = 0x100
+    palettes = []
+    for i in range(pallen // (colornum * 2)):
+        palette = []
+        for j in range(colornum):
+            palette.append(common.readPalette(f.readUShort()))
+        palettes.append(palette)
+    indexedpalettes = {i: palettes[i] for i in range(0, len(palettes))}
+    # Read tiles
+    ncgr = nitro.NCGR()
+    ncgr.tiles = []
+    ncgr.width = f.readUInt() * 8
+    ncgr.height = f.readUInt() * 8
+    ncgr.bpp = 8
+    ncgr.tilesize = 8
+    ncgr.lineal = False
+    ncgr.tilelen = (ncgr.width // 8) * (ncgr.height // 8) * 0x40
+    ncgr.tileoffset = f.tell()
+    return indexedpalettes, ncgr

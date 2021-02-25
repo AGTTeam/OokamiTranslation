@@ -15,6 +15,7 @@ def run(firstgame):
         return
     common.makeFolder(outfolder)
     chartot = transtot = 0
+    game.monthsection = game.skipsection = None
 
     encoding = "shift_jis" if firstgame else "shift_jisx0213"
     common.logMessage("Repacking DAT from", infile, "...")
