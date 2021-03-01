@@ -5,7 +5,7 @@ from hacktools import common
 
 
 def writeLine(out, pos, b1, b2, line):
-    out.write(str(pos).zfill(5) + " 0x" + common.toHex(b1) + ", 0x" + common.toHex(b2) + ": " + line + "  \n")
+    out.write(common.toHex(pos).replace("0x", "").zfill(5) + " 0x" + common.toHex(b1) + ", 0x" + common.toHex(b2) + ": " + line + "  \n")
 
 
 def run(firstgame, analyzefile):
@@ -63,10 +63,26 @@ def run(firstgame, analyzefile):
                                             first = False
                                         out.write(sjisline + "=\n")
                             if analyze:
-                                writeLine(a, pos, b1, b2, lenline + sjis)
+                                # Try to calculate the length to check if the calculation is correct
+                                addlen = ""
+                                with common.Stream() as test:
+                                    game.writeShiftJIS(test, sjis, b1 == 0x95, False, 0, encoding, firstgame)
+                                    testlen = test.tell()
+                                    test.seek(0)
+                                    addlen = test.readBytes(4 if b1 == 0x95 else 2)
+                                    if lenline != addlen:
+                                        test.seek(0)
+                                        addlen += "\nDIFF\n" + test.readBytes(testlen) + "\n"
+                                        fpos = f.tell()
+                                        f.seek(pos + 2)
+                                        addlen += f.readBytes(fpos - f.tell())
+                                writeLine(a, pos, b1, b2, lenline + sjis + " " + addlen)
                         elif (b1, b2) in game.wsbcodes:
                             if analyze:
-                                writeLine(a, pos, b1, b2, f.readBytes(game.wsbcodes[(b1, b2)]))
+                                ptrstr = ""
+                                if (b1, b2) in game.wsbpointers:
+                                    ptrstr += "ptr"
+                                writeLine(a, pos, b1, b2, f.readBytes(game.wsbcodes[(b1, b2)]) + ptrstr)
                             else:
                                 f.seek(game.wsbcodes[(b1, b2)], 1)
                         else:

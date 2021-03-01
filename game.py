@@ -1,3 +1,5 @@
+import codecs
+import os
 from hacktools import common, nitro
 
 # Ranges for BIN string locations
@@ -36,13 +38,13 @@ wsbcodes = {
     (0x00, 0x00): 0,
 }
 # Identifiers of WSB code blocks containing a pointer
-wsbpointers = [(0xCA, 0x00), (0xCB, 0x00), (0xCC, 0x00), (0xCD, 0x00), (0xCE, 0x00), (0xCF, 0x00), (0xD0, 0x00), (0xD7, 0x00)]
-# Characters to replace when reading a section
-fixchars = [("’", "'"), ("”", "\""), ("“", "{"), ("‘", "}")]
+wsbpointers = [(0x81, 0xB9), (0xCA, 0x00), (0xCB, 0x00), (0xCC, 0x00), (0xCD, 0x00), (0xCE, 0x00), (0xCF, 0x00), (0xD0, 0x00), (0xD7, 0x00)]
+# Wordwrap value
+wordwrap = (205, 215)
 
 
 # Game-specific string
-def writeShiftJIS(f, s, len2=False, untilZero=False, maxlen=0, encoding="shift_jis"):
+def writeShiftJIS(f, s, len2=False, untilZero=False, maxlen=0, encoding="shift_jis", firstgame=True):
     s = s.replace("～", "〜")
     if not untilZero:
         pos = f.tell()
@@ -95,7 +97,10 @@ def writeShiftJIS(f, s, len2=False, untilZero=False, maxlen=0, encoding="shift_j
     if untilZero:
         padding = 1
     else:
-        padding = 4 - (i % 2)
+        if firstgame:
+            padding = 4 - (i % 2)
+        else:
+            padding = 1 + ((i + 1) % 4)
     for x in range(padding):
         f.writeByte(0x00)
         i += 1
@@ -208,6 +213,17 @@ def detectShiftJIS(f, encoding="shift_jis"):
             unk += 1
         else:
             return ""
+
+
+def getFixChars():
+    fixchars = []
+    if not os.path.isfile("data/fontconfig.txt"):
+        return fixchars
+    with codecs.open("data/fontconfig.txt", "r", "utf-8") as f:
+        chars = common.getSection(f, "", "|")
+        for char in chars:
+            fixchars.append((char, chars[char][0].replace("<3D>", "=")))
+    return fixchars
 
 
 def readImage(infolder, file, extension):

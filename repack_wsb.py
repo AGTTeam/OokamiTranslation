@@ -19,12 +19,14 @@ def run(firstgame):
     if not os.path.isfile(fontfile):
         fontfile = fontfile.replace("replace/", "extract/")
     glyphs = nitro.readNFTR(fontfile).glyphs
+    wordwrap = game.wordwrap[0] if firstgame else game.wordwrap[1]
+    fixchars = game.getFixChars()
     with codecs.open(infile, "r", "utf-8") as wsb:
-        commonsection = common.getSection(wsb, "COMMON", fixchars=game.fixchars)
+        commonsection = common.getSection(wsb, "COMMON", fixchars=fixchars)
         chartot, transtot = common.getSectionPercentage(commonsection)
         files = common.getFiles(infolder, ".wsb")
         for file in common.showProgress(files):
-            section = common.getSection(wsb, file, fixchars=game.fixchars)
+            section = common.getSection(wsb, file, fixchars=fixchars)
             chartot, transtot = common.getSectionPercentage(section, chartot, transtot)
             # Repack the file
             pointerdiff = {}
@@ -78,23 +80,23 @@ def run(firstgame):
                                             sjissplit[i] = newsjis
                                         # Check for automatic centering
                                         elif newsjis.count("<<") > 0:
-                                            sjissplit[i] = common.centerLines(newsjis, glyphs, 205, centercode="<<")
+                                            sjissplit[i] = common.centerLines(newsjis, glyphs, wordwrap, centercode="<<")
                                         else:
-                                            sjissplit[i] = common.wordwrap(newsjis, glyphs, 205)
+                                            sjissplit[i] = common.wordwrap(newsjis, glyphs, wordwrap)
                                 newsjis = ">>".join(sjissplit)
                                 if newsjis != sjis and newsjis != "" and newsjis != ">>":
-                                    common.logDebug("Repacking at", pos)
+                                    common.logDebug("Repacking", newsjis, "at", common.toHex(pos))
                                     strreplaced = True
                                     if newsjis == "!":
                                         newsjis = ""
-                                    newlen = game.writeShiftJIS(f, newsjis, b1 == 0x95, False, 0, encoding)
+                                    newlen = game.writeShiftJIS(f, newsjis, b1 == 0x95, False, 0, encoding, firstgame)
                                     lendiff = newlen - oldlen
-                                    if newlen > 0x80 and b1 == 0x55:
+                                    if newlen > (0x80 if firstgame else 0x70) and b1 == 0x55:
                                         common.logDebug("String is too long", newlen, "changing to 0x95")
                                         f.seek(fpos)
                                         f.writeByte(0x95)
                                         f.writeByte(0x10)
-                                        game.writeShiftJIS(f, newsjis, True, False, 0, encoding)
+                                        game.writeShiftJIS(f, newsjis, True, False, 0, encoding, firstgame)
                                         lendiff += 2
                                     if lendiff != 0:
                                         common.logDebug("Adding", lendiff, "at", pos)
@@ -104,11 +106,8 @@ def run(firstgame):
                                 f.write(fin.read(oldlen + (4 if b1 == 0x95 else 2)))
                         elif (b1, b2) in game.wsbcodes:
                             if (b1, b2) in game.wsbpointers:
-                                pointer = fin.readUInt()
-                                pointers[f.tell()] = pointer
-                                f.writeUInt(pointer)
-                            elif b1 == 0x81 and b2 == 0xB9:
-                                f.write(fin.read(2))
+                                if b1 == 0x81 and b2 == 0xB9:
+                                    f.write(fin.read(2))
                                 pointer = fin.readUInt()
                                 pointers[f.tell()] = pointer
                                 f.writeUInt(pointer)
@@ -138,7 +137,7 @@ def run(firstgame):
                                         del section[sjis]
                                 if newsjis != "":
                                     strreplaced = True
-                                    newcodelen = game.writeShiftJIS(f, newsjis, False, True, 0, encoding)
+                                    newcodelen = game.writeShiftJIS(f, newsjis, False, True, 0, encoding, firstgame)
                                     if codelen != newcodelen:
                                         codediff += newcodelen - codelen
                             if not strreplaced:

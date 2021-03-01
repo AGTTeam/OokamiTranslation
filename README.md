@@ -3,7 +3,6 @@ This repository is for the tool used to translate the game. If you're looking fo
 ## Setup
 Create a "data" folder and copy the rom as "holo.nds" in it.  
 For the second game, the rom should be called "holo2.nds".  
-NOTE: support for the 2nd game is still lackluster.  
 ## Run from binary
 Download the latest [release](https://github.com/Illidanz/OokamiTranslation/releases) outside the data folder.  
 Run `tool extract` to extract everything and `tool repack` to repack after editing.  
@@ -23,6 +22,7 @@ Lines can be automatically centered by putting a `<<` at the beginning of the li
 Control codes are specified as `<XX>` or `UNK(XXXX)`, they should usually be kept.  
 To blank out a line, use a single `!`. If just left empty, the line will be left untranslated.  
 Comments can be added at the end of lines by using `#`  
+A `fontconfig.txt` file in the data folder can be used to define a list of characters and their replacement, separated by `=`, that will be replaced when writing strings.   
 ## Image Editing
 Rename the out\_\* folders to work\_\* (out_IMG to work_IMG, etc).  
 Edit the images in the work folder(s). The palette on the right should be followed but the repacker will try to approximate other colors to the closest one.  

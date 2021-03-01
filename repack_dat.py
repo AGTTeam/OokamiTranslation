@@ -23,6 +23,7 @@ def run(firstgame):
     if not os.path.isfile(fontfile):
         fontfile = fontfile.replace("replace/", "extract/")
     glyphs = nitro.readNFTR(fontfile).glyphs
+    fixchars = game.getFixChars()
     # Copy this txt file
     if not firstgame and os.path.isfile(infolder + "facilityhelp.txt"):
         common.copyFile(infolder + "facilityhelp.txt", outfolder + "facilityhelp.txt")
@@ -30,7 +31,7 @@ def run(firstgame):
     with codecs.open(infile, "r", "utf-8") as dat:
         files = common.getFiles(infolder, ".dat")
         for file in common.showProgress(files):
-            section = common.getSection(dat, file, fixchars=game.fixchars)
+            section = common.getSection(dat, file, fixchars=fixchars)
             # If there are no lines, just copy the file
             if len(section) == 0:
                 common.copyFile(infolder + file, outfolder + file)
