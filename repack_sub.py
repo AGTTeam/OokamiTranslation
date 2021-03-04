@@ -2,6 +2,7 @@ import codecs
 import os
 import ass
 import ndstextgen
+import game
 from hacktools import common, nitro
 
 
@@ -54,6 +55,8 @@ def createSubdata(subin, subfile, fontfile, palfile, textcolor, bgcolor, addfram
         lineend = common.deltaToFrame(event.end, fps) + addframes
         subdata.append({"start": linestart, "end": lineend, "pos": 0})
         text += event.text.strip() + "\n"
+        for fixchar in game.getFixChars():
+            text = text.replace(fixchar[0], fixchar[1])
     text = text.strip()
     sublen = len(subdata)
     # Create the sub image
