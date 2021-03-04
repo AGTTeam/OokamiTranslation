@@ -3,7 +3,7 @@ import click
 import game
 from hacktools import common, nds, nitro
 
-version = "1.5.1"
+version = "1.5.2"
 romfile = "data/holo.nds"
 rompatch = "data/holo_patched.nds"
 headerfile = "data/extract/header.bin"
@@ -57,7 +57,7 @@ def repack(no_rom, bin, dat, img, wsb, sub, force):
     if all or bin:
         import repack_bin
         repack_bin.run(firstgame)
-    if (all or dat) and firstgame:
+    if all or dat:
         import repack_dat
         repack_dat.run(firstgame)
     if all or wsb:

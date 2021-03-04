@@ -85,7 +85,7 @@ def run(firstgame):
                                             maxlen = 160
                                     newlen = game.writeShiftJIS(f, newsjis, False, True, maxlen, encoding)
                                     if newlen < 0:
-                                        if file != "gossip.dat":
+                                        if file != "gossip.dat" or not firstgame:
                                             common.logError("String {} is too long ({}/{}).".format(newsjis, len(newsjis), maxlen))
                                         else:
                                             common.logWarning("String {} is too long ({}/{}).".format(newsjis, len(newsjis), maxlen))
