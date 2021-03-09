@@ -4,7 +4,7 @@ import game
 from hacktools import common, nitro
 
 
-def run(firstgame):
+def run(firstgame, no_redirect):
     infolder = "data/extract/data/data/"
     outfolder = "data/repack/data/data/"
     infile = "data/dat_input.txt"
@@ -15,6 +15,7 @@ def run(firstgame):
         return
     common.makeFolder(outfolder)
     chartot = transtot = 0
+    monthsection, skipsection = game.monthsection, game.skipsection
     game.monthsection = game.skipsection = None
 
     encoding = "shift_jis" if firstgame else "shift_jisx0213"
@@ -85,7 +86,7 @@ def run(firstgame):
                                             maxlen = 160
                                     newlen = game.writeShiftJIS(f, newsjis, False, True, maxlen, encoding)
                                     if newlen < 0:
-                                        if file != "gossip.dat" or not firstgame:
+                                        if (file != "gossip.dat" or no_redirect) or not firstgame:
                                             common.logError("String {} is too long ({}/{}).".format(newsjis, len(newsjis), maxlen))
                                         else:
                                             common.logWarning("String {} is too long ({}/{}).".format(newsjis, len(newsjis), maxlen))
@@ -111,4 +112,5 @@ def run(firstgame):
         for i in range(len(redirects)):
             f.write("\nREDIRECT_{}:\n".format(i))
             f.write(".ascii \"{}\" :: .db 0\n".format(redirects[i].replace("\"", "\\\"").replace("|", "\" :: .db 0xa :: .ascii \"")))
+    game.monthsection, game.skipsection = monthsection, skipsection
     common.logMessage("Done! Translation is at {0:.2f}%".format((100 * transtot) / chartot))

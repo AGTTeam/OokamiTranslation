@@ -1,3 +1,4 @@
+import codecs
 import os
 import game
 from hacktools import common, nds, nitro
@@ -11,6 +12,7 @@ def run(firstgame):
     if not os.path.isfile(binfile):
         common.logError("Input file", binfile, "not found")
         return
+    fixchars = game.getFixChars()
 
     patchfile = "bin_patch.asm"
     fontfile = "data/replace/data/font/lcfont12.NFTR"
@@ -29,13 +31,21 @@ def run(firstgame):
         binin = binin.replace(".bin", "_dec.bin")
         binout = binout.replace(".bin", "_dec.bin")
 
-    nds.repackBIN(binrange, freeranges, game.detectShiftJIS, game.writeBINShiftJIS, "cp932", "#", binin, binout)
-    if patchfile != "":
-        if not os.path.isfile(fontfile):
-            fontfile = fontfile.replace("replace/", "extract/")
-        common.copyFile(injectfile, injectfile.replace("extract/", "repack/"))
-        nitro.extractFontData(fontfile, "data/font_data.bin")
-        common.armipsPatch(common.bundledFile(patchfile))
+    nds.repackBIN(binrange, freeranges, game.detectShiftJIS, game.writeBINShiftJIS, "cp932", "#", binin, binout, fixchars=fixchars)
+    # Check that the redirects file is created, or create an empty one
+    redfile = "data/redirects.asm"
+    if not os.path.isfile(redfile):
+        with codecs.open(redfile, "w", "utf-8") as f:
+            f.write(".ascii \"NDSC\"\n\n")
+            f.write("REDIRECT_START:\n\n")
+    # Extract font data
+    if not os.path.isfile(fontfile):
+        fontfile = fontfile.replace("replace/", "extract/")
+    common.copyFile(injectfile, injectfile.replace("extract/", "repack/"))
+    nitro.extractFontData(fontfile, "data/font_data.bin")
+    # Run armips
+    common.armipsPatch(common.bundledFile(patchfile))
+    # Compress the binary for the 2nd game
     if not firstgame:
         compfile = binout.replace("_dec.bin", ".bin")
         common.logMessage("Compressing BIN ...")

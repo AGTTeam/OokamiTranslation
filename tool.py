@@ -3,7 +3,7 @@ import click
 import game
 from hacktools import common, nds, nitro
 
-version = "1.5.2"
+version = "1.5.3"
 romfile = "data/holo.nds"
 rompatch = "data/holo_patched.nds"
 headerfile = "data/extract/header.bin"
@@ -45,21 +45,22 @@ def extract(rom, bin, dat, img, wsb, analyze):
 
 @common.cli.command()
 @click.option("--no-rom", is_flag=True, default=False)
-@click.option("--bin", is_flag=True, default=False)
 @click.option("--dat", is_flag=True, default=False)
+@click.option("--bin", is_flag=True, default=False)
 @click.option("--img", is_flag=True, default=False)
 @click.option("--wsb", is_flag=True, default=False)
 @click.option("--sub", is_flag=True, default=False)
+@click.option("--no-redirect", is_flag=True, default=False)
 @click.option("--force", default="")
-def repack(no_rom, bin, dat, img, wsb, sub, force):
-    all = not sub and not bin and not dat and not img and not wsb
+def repack(no_rom, dat, bin, img, wsb, sub, no_redirect, force):
+    all = not sub and not dat and not bin and not img and not wsb
     firstgame = nds.getHeaderID(headerfile) == "YU5J2J"
-    if all or bin:
-        import repack_bin
-        repack_bin.run(firstgame)
     if all or dat:
         import repack_dat
-        repack_dat.run(firstgame)
+        repack_dat.run(firstgame, no_redirect)
+    if all or dat or bin:
+        import repack_bin
+        repack_bin.run(firstgame)
     if all or wsb:
         import repack_wsb
         repack_wsb.run(firstgame)
