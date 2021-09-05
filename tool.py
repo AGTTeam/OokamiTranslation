@@ -120,4 +120,4 @@ if __name__ == "__main__":
     if not os.path.isdir("data"):
         common.logError("data folder not found.")
         quit()
-    common.cli()
+    common.runCLI(common.cli)
