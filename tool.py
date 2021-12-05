@@ -3,7 +3,7 @@ import click
 import game
 from hacktools import common, nds, nitro
 
-version = "1.5.3"
+version = "1.5.4"
 romfile = "data/holo.nds"
 rompatch = "data/holo_patched.nds"
 headerfile = "data/extract/header.bin"
@@ -82,7 +82,10 @@ def repack(no_rom, dat, bin, img, wsb, sub, no_redirect, force):
         if force != "":
             if not force.endswith(".wsb"):
                 force += ".wsb"
-            common.copyFile(outfolder + "data/script/" + force, outfolder + "data/script/event/ev_act/act_010_opening.wsb")
+            if firstgame:
+                common.copyFile(outfolder + "data/script/" + force, outfolder + "data/script/event/ev_act/act_010_opening.wsb")
+            else:
+                common.copyFile(outfolder + "data/script/" + force, outfolder + "data/script/event/ev_main/main_010_prologue.wsb")
         subtitle = "My Year with Holo" if firstgame else "The Wind that Spans the Sea"
         nds.editBannerTitle(bannerfile, "Spice & Wolf\n" + subtitle + "\nASCII MEDIA WORKS")
         romf = romfile if os.path.isfile(romfile) else romfile.replace("holo", "holo2")
