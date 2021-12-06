@@ -1,5 +1,5 @@
 # Ookami Translation
-This repository is for the tool used to translate the game. If you're looking for the English patch, click [here](http://www.romhacking.net/translations/6369/).  
+This repository is for the tool used to translate the game. If you're looking for the English patch, click [here](http://www.romhacking.net/translations/5967/).  
 ## Setup
 Create a "data" folder and copy the rom as "holo.nds" in it.  
 For the second game, the rom should be called "holo2.nds".  
