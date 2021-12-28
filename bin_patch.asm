@@ -33,7 +33,7 @@
   ARM_AREA     equ 0x491
   INJECT_START equ 0x021962a0
   INJECT_END   equ 0x021963b0
-  INJECT_END2  equ 0x021963b0 ;TODO: check on nds-boostrap
+  INJECT_END2  equ 0x021963b0
   SUB_RAM      equ 0x023a7140
   SUB_VRAM     equ 0x06214800
   RAM_FUNC     equ 0x02098828
@@ -388,39 +388,37 @@
   pop {pc}
   .pool
 
-  .if FIRST_GAME
-    GOSSIP:
-    beq GOSSIP_ZERO
-    cmp r0,0x1f
-    bne GOSSIP_LOOP
-    push {r2}
-    ;Check that REDIRECT_START contains "NDSC" before it
-    ldr r0,=REDIRECT_START
-    ldr r0,[r0,-0x4]
-    ldr r2,=0x4353444e ;"CSDN"
-    cmp r0,r2
-    ldreq r2,=REDIRECT_START
-    ldrne r2,=INJECT_END2
-    ;Set r1 to REDIRECT_START + redirectn*2
-    ldrb r0,[r1,0x0]
-    lsl r0,r0,0x1
-    mov r1,r2
-    ;ldr r1,[r1]
-    add r1,r1,r0
-    ;Set r1 to the redirected string
-    ldrh r0,[r1]
-    mov r1,r2
-    add r1,r1,r0
-    ;Set r0 to the next character and increase r1 by 1
-    ldrb r0,[r1,0x0]
-    add r1,r1,0x1
-    pop {r2}
-    ;Write it to [r13+0xc]
-    str r1,[r13,0xc]
-    ;Go back to normal execution
-    b GOSSIP_LOOP
-    .pool
-  .endif
+  GOSSIP:
+  beq GOSSIP_ZERO
+  cmp r0,0x1f
+  bne GOSSIP_LOOP
+  push {r2}
+  ;Check that REDIRECT_START contains "NDSC" before it
+  ldr r0,=REDIRECT_START
+  ldr r0,[r0,-0x4]
+  ldr r2,=0x4353444e ;"CSDN"
+  cmp r0,r2
+  ldreq r2,=REDIRECT_START
+  ldrne r2,=INJECT_END2
+  ;Set r1 to REDIRECT_START + redirectn*2
+  ldrb r0,[r1,0x0]
+  lsl r0,r0,0x1
+  mov r1,r2
+  ;ldr r1,[r1]
+  add r1,r1,r0
+  ;Set r1 to the redirected string
+  ldrh r0,[r1]
+  mov r1,r2
+  add r1,r1,r0
+  ;Set r0 to the next character and increase r1 by 1
+  ldrb r0,[r1,0x0]
+  add r1,r1,0x1
+  pop {r2}
+  ;Write it to [r13+0xc]
+  str r1,[r13,0xc]
+  ;Go back to normal execution
+  b GOSSIP_LOOP
+  .pool
 
   ;Add subtitles for the special message
   .if FIRST_GAME
@@ -557,6 +555,22 @@
     .org 0x0209f1e0
       ;add r1,r1,0x1
       bl SUBTITLE_FRAME
+    .org 0x02027694
+      b GOSSIP
+      GOSSIP_ZERO:
+    .org 0x02027654
+      GOSSIP_LOOP:
+
+    ;Tweak rumor text position
+    .org 0x02081d88
+      ;mov r2,r1 (0x8)
+      mov r2,0x6
+    .org 0x02081e50
+      ;mov r2,0x1c
+      mov r2,0x16
+    .org 0x02081f78
+      ;mov r2,0x70
+      mov r2,0x72
 
      ;Tweak starting position for dialog text
      .org 0x02030f0c

@@ -80,20 +80,23 @@ def run(firstgame, no_redirect):
                                         newsjis = common.wordwrap(newsjis, glyphs, 170)
                                     elif file == "gossip.dat":
                                         newsjis = common.wordwrap(newsjis, glyphs, 190)
+                                        if newsjis.count("<<") > 0:
+                                            newsjis = common.centerLines(newsjis, glyphs, 190, centercode="<<")
                                         if fin.tell() - pos < 35:
                                             maxlen = 35
                                         else:
                                             maxlen = 160
                                     newlen = game.writeShiftJIS(f, newsjis, False, True, maxlen, encoding)
                                     if newlen < 0:
-                                        if (file != "gossip.dat" or no_redirect) or not firstgame:
+                                        if file != "gossip.dat" or no_redirect or maxlen != 160:
                                             common.logError("String {} is too long ({}/{}).".format(newsjis, len(newsjis), maxlen))
                                         else:
                                             common.logWarning("String {} is too long ({}/{}).".format(newsjis, len(newsjis), maxlen))
                                             # Doesn't fit, write it shorter
                                             f.seek(pos)
-                                            stringfit = newsjis[:155]
-                                            stringrest = newsjis[155:]
+                                            cutat = 155 if firstgame else 150
+                                            stringfit = newsjis[:cutat]
+                                            stringrest = newsjis[cutat:]
                                             game.writeShiftJIS(f, stringfit, False, True, maxlen, encoding)
                                             f.seek(-1, 1)
                                             f.writeByte(0x1f)
@@ -111,6 +114,15 @@ def run(firstgame, no_redirect):
             f.write(".dh REDIRECT_{} - REDIRECT_START\n".format(i))
         for i in range(len(redirects)):
             f.write("\nREDIRECT_{}:\n".format(i))
-            f.write(".ascii \"{}\" :: .db 0\n".format(redirects[i].replace("\"", "\\\"").replace("|", "\" :: .db 0xa :: .ascii \"")))
+            redirect = redirects[i].replace("\"", "\\\"")
+            redirect = redirect.replace("|", "\" :: .db 0xa :: .ascii \"")
+            redirectascii = ""
+            for c in redirect:
+                if ord(c) > 127:
+                    sjisc = common.toHex(int.from_bytes(c.encode(encoding), "big"))
+                    redirectascii += "\" :: .db 0x" + sjisc[:2] + " :: .db 0x" + sjisc[2:] + " :: .ascii \""
+                else:
+                    redirectascii += c
+            f.write(".ascii \"{}\" :: .db 0\n".format(redirectascii))
     game.monthsection, game.skipsection = monthsection, skipsection
     common.logMessage("Done! Translation is at {0:.2f}%".format((100 * transtot) / chartot))
