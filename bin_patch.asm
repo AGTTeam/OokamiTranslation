@@ -561,6 +561,58 @@
     .org 0x02027654
       GOSSIP_LOOP:
 
+    ;Tweak payment deadline text position
+    .org 0x020b3d44
+      ;.dw 0xe8
+      .dw 0xa8
+
+    ;Tweak "To Repay" text position
+    .org 0x020565ac
+      ;mov r0,0xbe000
+      mov r0,0xbe000
+
+    ;Tweak contract OAM size
+    ;Increase the size
+    .org 0x0205583c
+      ;mov r1,0x4
+      mov r1,0x6
+    ;Move the text right
+    .org 0x02056368
+      ;mov r0,0x14000
+      mov r0,0x1c000
+    ;Move the next 2 tiles position
+    .org 0x02055864
+      ;mov r0,0xe2
+      mov r0,0xe4
+    .org 0x020558a8
+      ;mov r0,0xe6
+      mov r0,0xe8
+    ;These other values are not hardcoded in the function calls
+    .org 0x020b2260
+      .dw 0xee  ;0xec
+      .dw 0xf0  ;0xee
+      .dw 0xf2  ;0xf0
+      .dw 0xf4  ;0xf2
+    ;Move these other values too
+    .org 0x020568e0
+      ;add r2,r2,0x7100
+      add r2,r2,0x7200
+    .org 0x02056918
+      ;add r2,r2,0x7300
+      add r2,r2,0x7400
+    .org 0x02056950
+      ;add r2,r2,0x7600
+      add r2,r2,0x7700
+    .org 0x02056988
+      ;add r2,r2,0x7700
+      add r2,r2,0x7800
+    .org 0x020569c0
+      ;add r2,r2,0x7800
+      add r2,r2,0x7900
+    .org 0x020569f8
+      ;add r2,r2,0x7900
+      add r2,r2,0x7a00
+
     ;Tweak rumor text position
     .org 0x02081d88
       ;mov r2,r1 (0x8)

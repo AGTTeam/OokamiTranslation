@@ -83,6 +83,10 @@ def run(firstgame):
                                             sjissplit[i] = common.centerLines(newsjis, glyphs, wordwrap, centercode="<<")
                                         else:
                                             sjissplit[i] = common.wordwrap(newsjis, glyphs, wordwrap)
+                                            if sjissplit[i].count("|") > 2:
+                                                common.logError("Sub-line too long:", sjissplit[i])
+                                                cutsplit = sjissplit[i].split("|")
+                                                sjissplit[i] = cutsplit[0] + "|" + cutsplit[1] + "|" + cutsplit[2]
                                 newsjis = ">>".join(sjissplit)
                                 if newsjis != sjis and newsjis != "" and newsjis != ">>":
                                     common.logDebug("Repacking", newsjis, "at", common.toHex(pos))

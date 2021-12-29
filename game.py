@@ -16,8 +16,8 @@ monthsection = [
     (0xc6bf4, 0xc6c50)
 ]
 skipsection = [
-    (0x9791c, 0x9791f),
-    (0xc6bec, 0xc6bf3)
+    [(0x9791c, 0x9791f)],
+    [(0xc6bec, 0xc6bf3), (0xcfc80, 0xcfc83)],
 ]
 # Identifier and size of WSB code blocks
 wsbcodes = {
@@ -183,8 +183,10 @@ def detectShiftJIS(f, encoding="shift_jis"):
     unk = 0
     ismonth = monthsection is not None and f.tell() >= monthsection[0] and f.tell() <= monthsection[1]
     while True:
-        if skipsection is not None and f.tell() >= skipsection[0] and f.tell() <= skipsection[1]:
-            return ""
+        if skipsection is not None:
+            for skiprange in skipsection:
+                if f.tell() >= skiprange[0] and f.tell() <= skiprange[1]:
+                    return ""
         b1 = f.readByte()
         if b1 == 0:
             return ret

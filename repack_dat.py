@@ -78,6 +78,7 @@ def run(firstgame, no_redirect):
                                     maxlen = 0
                                     if file == "goods.dat":
                                         newsjis = common.wordwrap(newsjis, glyphs, 170)
+                                        maxlen = 60
                                     elif file == "gossip.dat":
                                         newsjis = common.wordwrap(newsjis, glyphs, 190)
                                         if newsjis.count("<<") > 0:
@@ -95,6 +96,8 @@ def run(firstgame, no_redirect):
                                             # Doesn't fit, write it shorter
                                             f.seek(pos)
                                             cutat = 155 if firstgame else 150
+                                            while ord(newsjis[cutat]) > 127:
+                                                cutat -= 1
                                             stringfit = newsjis[:cutat]
                                             stringrest = newsjis[cutat:]
                                             game.writeShiftJIS(f, stringfit, False, True, maxlen, encoding)
