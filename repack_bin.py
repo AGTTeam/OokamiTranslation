@@ -45,8 +45,18 @@ def run(firstgame):
     nitro.extractFontData(fontfile, "data/font_data.bin")
     # Run armips
     common.armipsPatch(common.bundledFile(patchfile))
-    # Compress the binary for the 2nd game
     if not firstgame:
+        # Compress the binary
         compfile = binout.replace("_dec.bin", ".bin")
         common.logMessage("Compressing BIN ...")
         nds.compressBinary(binout, compfile)
+        common.logMessage("Done!")
+        # Apply AP patch
+        apin = "data/extract/overlay/overlay_0000.bin"
+        apout = "data/repack/overlay/overlay_0000.bin"
+        common.copyFile(apin, apout)
+        with common.Stream(apout, "rb+") as f:
+            f.seek(0x432)
+            f.writeByte(0x36)
+            f.seek(0x58b)
+            f.writeByte(0x7b)

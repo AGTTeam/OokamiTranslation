@@ -36,6 +36,11 @@ def run(firstgame, no_redirect):
             # If there are no lines, just copy the file
             if len(section) == 0:
                 common.copyFile(infolder + file, outfolder + file)
+                # Part of the AP patch
+                if not firstgame and file == "route.dat":
+                    with common.Stream(outfolder + file, "rb+") as f:
+                        f.seek(0x5ee8)
+                        f.writeByte(0x0)
                 continue
             i = 0
             chartot, transtot = common.getSectionPercentage(section, chartot, transtot)

@@ -75,6 +75,10 @@ def repack(no_rom, dat, bin, img, wsb, sub, no_redirect, force):
         if not firstgame:
             import repack_kbg
             repack_kbg.run()
+            # Part of the AP patch
+            with common.Stream(ncgrfolder + "doubleinfo/SDLawrence_01.NCGR", "rb+") as f:
+                f.seek(0x26f1)
+                f.writeByte(0x17)
 
     if not no_rom:
         if os.path.isdir(replacefolder):
