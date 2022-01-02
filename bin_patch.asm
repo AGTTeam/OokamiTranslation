@@ -439,6 +439,9 @@
     .asciiz "JUN_SYS_010_freetalk"
     .asciiz "LKA_SYS_480"
     .asciiz "NRA_SYS_460"
+    .align
+    SPECIAL_STARTING:
+    .dw 0
   .endif
   .align
 
@@ -495,6 +498,11 @@
     @@found:
     ldr r0,=AUDIO_FRAME
     strh r5,[r0]
+    .if SECOND_GAME
+      ldr r0,=SPECIAL_STARTING
+      mov r1,0x1
+      str r1,[r0]
+    .endif
     bl SUBTITLE
     @@end:
     pop {lr,r0-r5}
@@ -504,6 +512,11 @@
 
   SPECIAL_FRAME:
   push {lr,r0-r1}
+  .if SECOND_GAME
+    ldr r0,=SPECIAL_STARTING
+    mov r1,0x0
+    str r1,[r0]
+  .endif
   ;Check if the special message is playing
   ldr r0,=AUDIO_FRAME
   ldrh r1,[r0]
@@ -525,6 +538,12 @@
   SPECIAL_STOP:
   push {r0-r1}
   ;Check if the special message is playing
+  .if SECOND_GAME
+    ldr r0,=SPECIAL_STARTING
+    ldr r1,[r0]
+    cmp r1,0x1
+    beq @@ret
+  .endif
   ldr r0,=AUDIO_FRAME
   ldrh r1,[r0]
   cmp r1,0x0
