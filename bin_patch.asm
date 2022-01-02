@@ -29,6 +29,7 @@
   SECOND_GAME  equ 0x1
   ARM_FILE     equ "data/repack/arm9_dec.bin"
   SUB_PATH     equ "data/opsub.dat"
+  SPECIAL_PATH equ "data/special1.dat"
   ARM_POS      equ 0x020c8178
   ARM_AREA     equ 0x491
   INJECT_START equ 0x021962a0
@@ -36,7 +37,7 @@
   INJECT_END2  equ 0x021963b0
   SUB_RAM      equ 0x023a7140
   SUB_VRAM     equ 0x06214800
-  RAM_FUNC     equ 0x02098828
+  RAM_FUNC     equ 0x0204c144
 .endif
 
 ;Plug the redirects code at the end of the digit8 font
@@ -212,6 +213,11 @@
   ;File containing the the opening sub graphics
   SUB_FILE:
   .asciiz SUB_PATH
+  .if SECOND_GAME
+    SPECIAL_FILE:
+    .asciiz SPECIAL_PATH
+  .endif
+  .align
   ;Current frame for audio subtitles
   AUDIO_FRAME:
   .dh 0x0
@@ -219,7 +225,8 @@
 
   ;Load the subtitles file in ram
   SUBTITLE:
-  push {lr,r0-r2}
+  push {lr,r0-r4}
+  ;Load the file
   .if FIRST_GAME
     ;This functions loads the file r1 into r0+0xc, but only up
     ;to 0xa78 bytes, so we temporarily modify that max size
@@ -227,13 +234,11 @@
     ldr r0,=SUB_SIZE
     ldr r1,=0xfffff
     str r1,[r0]
-  .endif
-  ;Load the file
-  ldr r0,=SUB_RAM
-  sub r0,r0,0xc
-  ldr r1,=SUB_FILE
-  bl RAM_FUNC
-  .if FIRST_GAME
+    ;Load the file
+    ldr r0,=SUB_RAM
+    sub r0,r0,0xc
+    ldr r1,=SUB_FILE
+    bl RAM_FUNC
     ;Restore the size pointer
     ldr r0,=SUB_SIZE
     ldr r1,=0xa78
@@ -243,6 +248,20 @@
     ldrh r0,[r0]
     cmp r0,0x0
     beq @@ret
+  .else
+    ;Check what file we need to load
+    ldr r0,=AUDIO_FRAME
+    ldrh r0,[r0]
+    cmp r0,0x0
+    ldreq r1,=SUB_FILE
+    beq @@loadfile
+    ldr r1,=SPECIAL_FILE
+    add r0,r0,0x30
+    strb r0,[r1,0xc]
+    @@loadfile:
+    ;Load the file
+    ldr r0,=SUB_RAM
+    bl RAM_FUNC
   .endif
   ;Enable BG1 (2nd bit)
   ldr r0,=0x4001001
@@ -292,7 +311,7 @@
   strb r1,[r0]
   ;Go back to normal execution
   @@ret:
-  pop {r0-r2}
+  pop {r0-r4}
   .if FIRST_GAME
     add r0,r6,0x1000
   .else
@@ -300,19 +319,6 @@
   .endif
   pop {pc}
   .pool
-
-  .if SECOND_GAME
-    SUBTITLE_RAM:
-    push {lr}
-    ldr r2,=SUB_RAM
-    ldr r2,[r2]
-    cmp r2,0x0
-    movne r2,0x8c0
-    popne {pc}
-    ldr r2,=0xfffff
-    pop {pc}
-    .pool
-  .endif
 
   ;Draw or clear the subtitles at the current frame
   SUBTITLE_FRAME:
@@ -327,8 +333,10 @@
   .endif
   ldr r2,[r0]
   ldr r3,[r0,r2]
+  cmp r3,0x0
+  beq @@end
   cmp r1,r3
-  bne @@end
+  blt @@end
   ;Push the rest of the registers and get current offset/clear
   push {r4-r11}
   add r2,r2,0x4
@@ -421,12 +429,21 @@
   .pool
 
   ;Add subtitles for the special message
+  SPECIAL_NAME:
   .if FIRST_GAME
-    SPECIAL_NAME:
     .asciiz "HOR_SYS_420.ahx"
-    .align
+  .else
+    .db 0x0
+    .asciiz "EVE_SYS_460"
+    .asciiz "HOR_SYS_490"
+    .asciiz "JUN_SYS_010_freetalk"
+    .asciiz "LKA_SYS_480"
+    .asciiz "NRA_SYS_460"
+  .endif
+  .align
 
-    SPECIAL:
+  SPECIAL:
+  .if FIRST_GAME
     push {lr,r0-r2,r4}
     ;Compare r3 with HOR_SYS_420.ahx
     ldr r0,=SPECIAL_NAME
@@ -450,42 +467,93 @@
     @@end:
     pop {lr,r0-r2,r4}
     b 0x2069774
-    .pool
-
-    SPECIAL_FRAME:
-    push {lr,r0-r1}
-    ;Check if the special message is playing
-    ldr r0,=AUDIO_FRAME
-    ldrh r1,[r0]
-    cmp r1,0x0
-    beq @@ret
-    ;Increase the frame and call the frame function
-    add r1,r1,0x1
-    strh r1,[r0]
-    bl SUBTITLE_FRAME
-    @@ret:
-    pop {lr,r0-r1}
-    b 0x0205818c
-    .pool
-
-    SPECIAL_STOP:
-    push {r0-r1}
-    ;Check if the special message is playing
-    ldr r0,=AUDIO_FRAME
-    ldrh r1,[r0]
-    cmp r1,0x0
-    beq @@ret
-    ;Set audio frame to 0
+  .else
+    push {lr,r0-r5}
+    mov r3,r2
+    ldr r0,=SPECIAL_NAME
     mov r1,0x0
-    strh r1,[r0]
-    ;Disable BG1 (2nd bit)
-    ldr r0,=0x4001001
-    ldrb r1,[r0]
-    and r1,r1,0xfd
-    strb r1,[r0]
-    @@ret:
-    pop {r0-r1}
+    mov r5,0x0
+    ;Increase r5 and read r0 until 0 to get to the next name
+    @@nextone:
+    add r5,r5,0x1
+    cmp r5,0x6
+    bge @@end
+    @@loopzero:
+    ldrb r2,[r0]
+    add r0,r0,0x1
+    cmp r2,0x0
+    bne @@loopzero
+    @@loop:
+    ldrb r2,[r0,r1]
+    ldrb r4,[r3,r1]
+    cmp r2,r4
+    bne @@nextone
+    cmp r2,0x0
+    beq @@found
+    add r1,r1,0x1
+    b @@loop
+    @@found:
+    ldr r0,=AUDIO_FRAME
+    strh r5,[r0]
+    bl SUBTITLE
+    @@end:
+    pop {lr,r0-r5}
+    b 0x02012a64
+  .endif
+  .pool
+
+  SPECIAL_FRAME:
+  push {lr,r0-r1}
+  ;Check if the special message is playing
+  ldr r0,=AUDIO_FRAME
+  ldrh r1,[r0]
+  cmp r1,0x0
+  beq @@ret
+  ;Increase the frame and call the frame function
+  add r1,r1,0x1
+  strh r1,[r0]
+  bl SUBTITLE_FRAME
+  @@ret:
+  pop {lr,r0-r1}
+  .if FIRST_GAME
+    b 0x0205818c
+  .else
+    b 0x0205f45c
+  .endif
+  .pool
+
+  SPECIAL_STOP:
+  push {r0-r1}
+  ;Check if the special message is playing
+  ldr r0,=AUDIO_FRAME
+  ldrh r1,[r0]
+  cmp r1,0x0
+  beq @@ret
+  ;Set audio frame to 0
+  mov r1,0x0
+  strh r1,[r0]
+  ;Disable BG1 (2nd bit)
+  ldr r0,=0x4001001
+  ldrb r1,[r0]
+  and r1,r1,0xfd
+  strb r1,[r0]
+  @@ret:
+  pop {r0-r1}
+  .if FIRST_GAME
     b 0x020664d4
+  .else
+    b 0x0206daf8
+  .endif
+  .pool
+
+  .if SECOND_GAME
+  SPECIAL_CONTROL:
+    push {lr,r2}
+    ldr r2,=AUDIO_FRAME
+    ldrh r2,[r2]
+    cmp r2,0x0
+    streq r0,[r1]
+    pop {pc,r2}
     .pool
   .endif
 .endarea
@@ -549,12 +617,21 @@
     .org 0x0209d1c4
       ;mov r4,r0
       bl SUBTITLE
-    .org 0x02098854
-      ;mov r2,0x8c0
-      bl SUBTITLE_RAM
     .org 0x0209f1e0
       ;add r1,r1,0x1
       bl SUBTITLE_FRAME
+    .org 0x02045080
+      ;bl 0x02012a64
+      bl SPECIAL
+    .org 0x0205f580
+      ;bl 0x0205f45c
+      bl SPECIAL_FRAME
+    .org 0x0205ccc0
+      ;bl 0x0206daf8
+      bl SPECIAL_STOP
+    .org 0x02031954
+      ;str r0,[r1]
+      bl SPECIAL_CONTROL
     .org 0x02027694
       b GOSSIP
       GOSSIP_ZERO:
