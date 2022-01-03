@@ -502,8 +502,6 @@
       ldr r0,=SPECIAL_STARTING
       mov r1,0x1
       str r1,[r0]
-      ;Wait for VBlank to avoid a black line on screen
-      swi 0x50000
     .endif
     bl SUBTITLE
     @@end:
