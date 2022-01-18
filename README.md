@@ -4,9 +4,9 @@ This repository is for the tool used to translate the game. If you're looking fo
 Create a "data" folder and copy the rom as "holo.nds" in it.  
 For the second game, the rom should be called "holo2.nds".  
 ## Run from binary
-Download the latest [release](https://github.com/Illidanz/OokamiTranslation/releases) outside the data folder.
-Run `tool extract` to extract everything and `tool repack` to repack after editing.
-Run `tool extract --help` or `tool repack --help` for more info.
+Download the latest [release](https://github.com/Illidanz/OokamiTranslation/releases) outside the data folder.  
+Run `tool extract` to extract everything and `tool repack` to repack after editing.  
+Run `tool extract --help` or `tool repack --help` for more info.  
 ## Run from source
 Install [Python 3.8](https://www.python.org/downloads/) and pipenv.  
 Download [ndstool.exe](https://www.darkfader.net/ds/files/ndstool.exe).  
