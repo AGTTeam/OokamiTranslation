@@ -3,7 +3,7 @@ import click
 import game
 from hacktools import common, nds, nitro
 
-version = "1.7.1"
+version = "1.7.2"
 romfile = "data/holo.nds"
 rompatch = "data/holo_patched.nds"
 headerfile = "data/extract/header.bin"

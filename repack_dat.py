@@ -92,6 +92,10 @@ def run(firstgame, no_redirect):
                                             maxlen = 35
                                         else:
                                             maxlen = 160
+                                    elif file == "scenarioguide.dat":
+                                        newsjis = common.wordwrap(newsjis, glyphs, 165)
+                                        if newsjis.count("|") > 1:
+                                            common.logError("scenarioguide line", newsjis, "too long")
                                     newlen = game.writeShiftJIS(f, newsjis, False, True, maxlen, encoding)
                                     if newlen < 0:
                                         if file != "gossip.dat" or no_redirect or maxlen != 160:
