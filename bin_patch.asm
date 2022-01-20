@@ -32,9 +32,9 @@
   SPECIAL_PATH equ "data/special1.dat"
   ARM_POS      equ 0x020c8178
   ARM_AREA     equ 0x491
-  INJECT_START equ 0x021962a0
-  INJECT_END   equ 0x021963b0
-  INJECT_END2  equ 0x021963b0
+  INJECT_START equ 0x02196320
+  INJECT_END   equ 0x02196430
+  INJECT_PTR   equ 0x020dec4c
   SUB_RAM      equ 0x023a7140
   SUB_VRAM     equ 0x06214800
   RAM_FUNC     equ 0x0204c144
@@ -401,13 +401,19 @@
   cmp r0,0x1f
   bne GOSSIP_LOOP
   push {r2}
-  ;Check that REDIRECT_START contains "NDSC" before it
-  ldr r0,=REDIRECT_START
-  ldr r0,[r0,-0x4]
-  ldr r2,=0x4353444e ;"CSDN"
-  cmp r0,r2
-  ldreq r2,=REDIRECT_START
-  ldrne r2,=INJECT_END2
+  .if FIRST_GAME
+    ;Check that REDIRECT_START contains "NDSC" before it
+    ldr r0,=REDIRECT_START
+    ldr r0,[r0,-0x4]
+    ldr r2,=0x4353444e ;"CSDN"
+    cmp r0,r2
+    ldreq r2,=REDIRECT_START
+    ldrne r2,=INJECT_END2
+  .else
+    ldr r2,=INJECT_PTR
+    ldr r2,[r2]
+    add r2,r2,4 + INJECT_END - INJECT_START
+  .endif
   ;Set r1 to REDIRECT_START + redirectn*2
   ldrb r0,[r1,0x0]
   lsl r0,r0,0x1
