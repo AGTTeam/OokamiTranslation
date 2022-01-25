@@ -726,9 +726,26 @@
       ;mov r2,0x70
       mov r2,0x72
 
-     ;Tweak starting position for dialog text
-     .org 0x02030f0c
-     ;add r2,r12,0xa
-     add r2,r12,0x4
+    ;Tweak Goods Knowledge increased message
+    ;Don't care about making more room in the stack since we're not using the text that would be at sp+0x4
+    .org 0x0203ab7c
+    .area 0x2c,0x0
+      str r4,[sp,0x4]
+      add r0,r6,r5,lsl 0x2
+      add r0,r0,0x8000
+      ldr r0,[r0,0xa24]
+      str r0,[sp,0x0]
+      add r0,sp,0x54
+      mov r1,0x4f
+      bl 0x0200f534
+      ldr r4,[sp,0x4]
+    .endarea
+    .org 0x0203abcc
+      nop
+
+    ;Tweak starting position for dialog text
+    .org 0x02030f0c
+      ;add r2,r12,0xa
+      add r2,r12,0x4
   .endif
 .close
