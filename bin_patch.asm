@@ -485,7 +485,7 @@
     ;Increase r5 and read r0 until 0 to get to the next name
     @@nextone:
     add r5,r5,0x1
-    cmp r5,0x6
+    cmp r5,0x5
     bge @@end
     @@loopzero:
     ldrb r2,[r0]
