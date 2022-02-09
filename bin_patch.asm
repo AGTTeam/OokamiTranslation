@@ -580,6 +580,27 @@
     streq r0,[r1]
     pop {pc,r2}
     .pool
+
+  STRLEN:
+    push {r2-r3}
+    mov r1,0x0
+    mov r2,0x0
+    ldr r3,=FONT_DATA
+    @@loop:
+    ldrsb r1,[r0]
+    cmp r1,0x0
+    beq @@ret
+    add r0,r0,0x1
+    add r1,r3,r1
+    sub r1,r1,0x20
+    ldrb r1,[r1]
+    add r2,r2,r1
+    b @@loop
+    @@ret:
+    mov r0,r2
+    pop {r2-r3}
+    bx lr
+    .pool
   .endif
 .endarea
 .close
@@ -730,6 +751,14 @@
     .org 0x02081f78
       ;mov r2,0x70
       mov r2,0x72
+
+    ;Tweak strlen function for centering text
+    .org 0x0208e420
+      bl STRLEN
+    .org 0x0208e4b4
+      lsr r2,r0,0x1
+      .skip 8
+      rsb r1,r2,0x53
 
     ;Tweak Goods Knowledge increased message
     ;Don't care about making more room in the stack since we're not using the text that would be at sp+0x4
