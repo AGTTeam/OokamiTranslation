@@ -760,6 +760,11 @@
       .skip 8
       rsb r1,r2,0x53
 
+    ;Tweak sprintf function to use "_" instead of " " for padding short numbers for more consistent align
+    .org 0x0200fcec
+      ;mov r1,0x20
+      mov r1,0x5f
+
     ;Tweak Goods Knowledge increased message
     ;Don't care about making more room in the stack since we're not using the text that would be at sp+0x4
     .org 0x0203ab7c
