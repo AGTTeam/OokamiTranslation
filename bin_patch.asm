@@ -687,7 +687,7 @@
     ;Tweak payment deadline text position
     .org 0x020b3d44
       ;.dw 0xe8
-      .dw 0xa8
+      .dw 0xb1
 
     ;Tweak "To Repay" text position
     .org 0x020565ac
