@@ -697,7 +697,7 @@
     ;Tweak Agreement Destination text position
     .org 0x020b3d14
       ;.dw 0xf4
-      .dw 0xd4
+      .dw 0xdf
 
     ;Tweak contract OAM size
     ;Increase the size
