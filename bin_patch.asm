@@ -760,6 +760,11 @@
       .skip 8
       rsb r1,r2,0x53
 
+    ;Tweak contract days left (%d日) alignment
+    .org 0x0203a2e8
+      ;mov r5,r0
+      sub r5,r0,0x1
+
     ;Tweak sprintf function to use "_" instead of " " for padding short numbers for more consistent align
     .org 0x0200fcec
       ;mov r1,0x20

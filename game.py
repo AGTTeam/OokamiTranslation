@@ -4,8 +4,8 @@ from hacktools import common, nitro
 
 # Ranges for BIN string locations
 binrange = [
-    (0x952CC, 0xA0320),
-    (0xC3A78, 0xD73C0)
+    (0x952cc, 0xa0320),
+    (0xc3a78, 0xd73cf)
 ]
 freeranges = [
     [(0x98ce4, 0x98e66), (0x98e74, 0x98ec7), (0x98ed4, 0x99303)],
