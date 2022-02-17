@@ -434,6 +434,16 @@
   b GOSSIP_LOOP
   .pool
 
+  .if SECOND_GAME
+  GOSSIP_FIRST:
+  beq GOSSIP_FIRST_ZERO
+  ldrsb r7,[sp,0x40]
+  cmp r0,0x1f
+  bne GOSSIP_LOOP
+  cmp r0,0x0
+  b GOSSIP
+  .endif
+
   ;Add subtitles for the special message
   SPECIAL_NAME:
   .if FIRST_GAME
@@ -681,6 +691,10 @@
     .org 0x02027694
       b GOSSIP
       GOSSIP_ZERO:
+    .org 0x0202764c
+      b GOSSIP_FIRST
+    .org 0x02027698
+      GOSSIP_FIRST_ZERO:
     .org 0x02027654
       GOSSIP_LOOP:
 
