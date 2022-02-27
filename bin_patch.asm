@@ -490,13 +490,13 @@
     push {lr,r0-r5}
     mov r3,r2
     ldr r0,=SPECIAL_NAME
-    mov r1,0x0
     mov r5,0x0
     ;Increase r5 and read r0 until 0 to get to the next name
     @@nextone:
+    mov r1,0x0
     add r5,r5,0x1
     cmp r5,0x5
-    bge @@end
+    bgt @@end
     @@loopzero:
     ldrb r2,[r0]
     add r0,r0,0x1
@@ -514,11 +514,9 @@
     @@found:
     ldr r0,=AUDIO_FRAME
     strh r5,[r0]
-    .if SECOND_GAME
-      ldr r0,=SPECIAL_STARTING
-      mov r1,0x1
-      str r1,[r0]
-    .endif
+    ldr r0,=SPECIAL_STARTING
+    mov r1,0x1
+    str r1,[r0]
     bl SUBTITLE
     @@end:
     pop {lr,r0-r5}
