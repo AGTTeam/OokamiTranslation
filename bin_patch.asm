@@ -295,9 +295,9 @@
     strh r1,[r0]
   .else
     ;Copy the palette
-    ldr r0,=0x06898000
-    ldr r1,=0x0689a000
-    mov r2,0x80
+    ldr r0,=0x06898004
+    ldr r1,=0x0689a004
+    mov r2,0xa
     @@palLoop:
     ldr r4,[r0],0x4
     str r4,[r1],0x4
