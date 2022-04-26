@@ -35,13 +35,13 @@ def run(firstgame):
                 f.write(fin.read())
         os.remove(subfile2)
     else:
-        subin = ["data/EVE_SYS_460.ass", "data/HOR_SYS_490.ass", "data/JUN_SYS_010_freetalk.ass", "data/LKA_SYS_480.ass", "data/NRA_SYS_460.ass"]
+        subin = ["data/EVE_SYS_460.ass", "data/HOR_SYS_490.ass", "data/JUN_SYS_010_freetalk.ass", "data/LKA_SYS_480.ass", "data/NRA_SYS_460.ass", "data/BGM16ED2.ass"]
         palfile = "data/extract/data/graphics/systemmenu/BottomBG.NCLR"
         bgcolor = "transparent"
         addframes = 3
         for i in range(len(subin)):
             subfile2 = "data/repack/data/data/special" + str(i + 1) + ".dat"
-            createSubdata(subin[i], subfile2, fontfile, palfile, textcolor, bgcolor, addframes, 60)
+            createSubdata(subin[i], subfile2, fontfile, palfile, textcolor, bgcolor, addframes if i < 5 else 110, 60 if i < 5 else 120)
 
 
 def createSubdata(subin, subfile, fontfile, palfile, textcolor, bgcolor, addframes, fps=30):

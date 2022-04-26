@@ -30,6 +30,7 @@
   ARM_FILE     equ "data/repack/arm9_dec.bin"
   SUB_PATH     equ "data/opsub.dat"
   SPECIAL_PATH equ "data/special1.dat"
+  ED_PATH      equ "ev_main/main_sub_staffroll"
   ARM_POS      equ 0x020c8178
   ARM_AREA     equ 0x491
   INJECT_START equ 0x02196320
@@ -455,6 +456,8 @@
     .asciiz "JUN_SYS_010_freetalk"
     .asciiz "LKA_SYS_480"
     .asciiz "NRA_SYS_460"
+    ED_NAME:
+    .asciiz ED_PATH
     .align
     SPECIAL_STARTING:
     .dw 0
@@ -611,6 +614,72 @@
     .pool
   .endif
 .endarea
+
+.if SECOND_GAME
+.org 0x020c8648
+  .area 0x100
+  ED_PLAYING:
+  .dw 0
+
+  ED:
+  mov r2,r0
+  push {lr,r0-r4}
+  ldr r1,=ED_NAME
+  ;Compare r0 with r1
+  @@loop:
+  ldrb r2,[r0],0x1
+  ldrb r3,[r1],0x1
+  cmp r2,r3
+  bne @@end
+  cmp r2,0x0
+  bne @@loop
+  @@found:
+  ldr r0,=ED_PLAYING
+  mov r1,0x1
+  str r1,[r0]
+  @@end:
+  pop {pc,r0-r4}
+
+  ED_FRAME:
+  mov r0,0x0
+  push {lr,r0-r2}
+  ;Wait 0x10 frames before calling SUBTITLE
+  ldr r0,=ED_PLAYING
+  ldr r1,[r0]
+  cmp r1,0x0
+  beq @@ret
+  cmp r1,0x10
+  add r1,r1,0x1
+  str r1,[r0]
+  blt @@ret
+  bgt @@callframe
+  ldr r0,=AUDIO_FRAME
+  mov r1,0x6
+  strh r1,[r0]
+  bl SUBTITLE
+  ldr r0,=AUDIO_FRAME
+  mov r1,0x10
+  ldrh r1,[r0]
+  @@callframe:
+  ;Increase the frame and call the frame function
+  ldr r0,=AUDIO_FRAME
+  ldrh r1,[r0]
+  add r1,r1,0x1
+  strh r1,[r0]
+  bl SUBTITLE_FRAME
+  ;Check if it finished playing
+  ldr r0,=SUB_RAM
+  ldr r1,[r0]
+  ldr r2,[r0,r1]
+  ldr r0,=ED_PLAYING
+  mov r1,0x0
+  cmp r2,0x0
+  ldreq r1,[r0]
+  @@ret:
+  pop {pc,r0-r2}
+  .pool
+  .endarea
+.endif
 .close
 
 ;Inject custom code
@@ -686,6 +755,10 @@
     .org 0x02031954
       ;str r0,[r1]
       bl SPECIAL_CONTROL
+    .org 0x020427e4
+      bl ED
+    .org 0x0205f564
+      bl ED_FRAME
     .org 0x02027694
       b GOSSIP
       GOSSIP_ZERO:
