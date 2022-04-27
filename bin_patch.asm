@@ -755,7 +755,7 @@
     .org 0x02031954
       ;str r0,[r1]
       bl SPECIAL_CONTROL
-    .org 0x020427e4
+    .org 0x0204274c
       bl ED
     .org 0x0205f564
       bl ED_FRAME
