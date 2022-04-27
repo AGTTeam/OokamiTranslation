@@ -643,12 +643,12 @@
   ED_FRAME:
   mov r0,0x0
   push {lr,r0-r2}
-  ;Wait 0x10 frames before calling SUBTITLE
+  ;Wait 0x40 frames before calling SUBTITLE
   ldr r0,=ED_PLAYING
   ldr r1,[r0]
   cmp r1,0x0
   beq @@ret
-  cmp r1,0x10
+  cmp r1,0x40
   add r1,r1,0x1
   str r1,[r0]
   blt @@ret
@@ -658,7 +658,7 @@
   strh r1,[r0]
   bl SUBTITLE
   ldr r0,=AUDIO_FRAME
-  mov r1,0x10
+  mov r1,0x40
   ldrh r1,[r0]
   @@callframe:
   ;Increase the frame and call the frame function
