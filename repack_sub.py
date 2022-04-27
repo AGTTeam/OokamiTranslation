@@ -41,7 +41,7 @@ def run(firstgame):
         addframes = 3
         for i in range(len(subin)):
             subfile2 = "data/repack/data/data/special" + str(i + 1) + ".dat"
-            createSubdata(subin[i], subfile2, fontfile, palfile, textcolor, bgcolor, addframes if i < 5 else 110, 60 if i < 5 else 120)
+            createSubdata(subin[i], subfile2, fontfile, palfile, textcolor, bgcolor, addframes if i < 5 else 80, 60 if i < 5 else 119)
 
 
 def createSubdata(subin, subfile, fontfile, palfile, textcolor, bgcolor, addframes, fps=30):
