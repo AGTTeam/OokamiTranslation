@@ -617,7 +617,7 @@
 
 .if SECOND_GAME
 .org 0x020c8648
-  .area 0x100
+  .area 0x130
   ED_PLAYING:
   .dw 0
 
@@ -678,6 +678,36 @@
   @@ret:
   pop {pc,r0-r2}
   .pool
+
+  FIX_CONTRACT_BUG:
+  mov r6,r4
+  push {lr,r0-r6}
+  ldr r0,[r7,0x8]
+  add r0,r0,r6
+  bl 0x0208fbe4
+  cmp r0,0x0
+  beq @@ret
+  ;If the tutorial contract is in progress, we check if there are more
+  add r5,r5,0x1
+  add r6,r6,0xc4
+  @@loop:
+  ldr r0,[r7,0x8]
+  add r0,r0,r6
+  bl 0x0208fbe4
+  cmp r0,0x0
+  bne @@retfix
+  ldr r0,[r7,0x4]
+  add r5,r5,0x1
+  cmp r5,r0
+  add r6,r6,0xc4
+  blt @@loop
+  @@ret:
+  pop {pc,r0-r6}
+  @@retfix:
+  pop {r0-r6}
+  add r5,r5,0x1
+  add r6,r6,0xc4
+  pop {pc}
   .endarea
 .endif
 .close
@@ -768,6 +798,11 @@
       GOSSIP_FIRST_ZERO:
     .org 0x02027654
       GOSSIP_LOOP:
+
+    ;Fix contract bug
+    .org 0x0209001c
+      ;mov r6,r4
+      bl FIX_CONTRACT_BUG
 
     ;Tweak payment deadline text position
     .org 0x020b3d44
