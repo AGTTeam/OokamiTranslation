@@ -674,7 +674,9 @@
   ldr r0,=ED_PLAYING
   mov r1,0x0
   cmp r2,0x0
-  ldreq r1,[r0]
+  streq r1,[r0]
+  ldr r0,=AUDIO_FRAME
+  streq r1,[r0]
   @@ret:
   pop {pc,r0-r2}
   .pool
