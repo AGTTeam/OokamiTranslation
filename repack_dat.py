@@ -15,8 +15,7 @@ def run(firstgame, no_redirect):
         return
     common.makeFolder(outfolder)
     chartot = transtot = 0
-    monthsection, skipsection = game.monthsection, game.skipsection
-    game.monthsection = game.skipsection = None
+    game.usemonthsection = game.useskipsection = None
 
     encoding = "shift_jis" if firstgame else "shift_jisx0213"
     common.logMessage("Repacking DAT from", infile, "...")
@@ -132,10 +131,9 @@ def run(firstgame, no_redirect):
             redirectascii = ""
             for c in redirect:
                 if ord(c) > 127:
-                    sjisc = common.toHex(int.from_bytes(c.encode(encoding), "big"))
+                    sjisc = common.toHex(int.from_bytes(c.encode(encoding), "big"), True)
                     redirectascii += "\" :: .db 0x" + sjisc[:2] + " :: .db 0x" + sjisc[2:] + " :: .ascii \""
                 else:
                     redirectascii += c
             f.write(".ascii \"{}\" :: .db 0\n".format(redirectascii))
-    game.monthsection, game.skipsection = monthsection, skipsection
     common.logMessage("Done! Translation is at {0:.2f}%".format((100 * transtot) / chartot))

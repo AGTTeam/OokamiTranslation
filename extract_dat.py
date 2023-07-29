@@ -11,7 +11,7 @@ def run(firstgame):
     if not firstgame:
         ignorefiles.append("love_event.dat")
     encoding = "shift_jis" if firstgame else "shift_jisx0213"
-    game.monthsection = game.skipsection = None
+    game.usemonthsection = game.useskipsection = None
 
     common.logMessage("Extracting DAT to", outfile, "...")
     with codecs.open(outfile, "w", "utf-8") as out:

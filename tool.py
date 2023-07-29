@@ -3,8 +3,8 @@ import click
 import game
 from hacktools import common, nds, nitro
 
-version = "1.8.2"
-romfile = "data/holo.nds"
+version = "1.9.0"
+romfile = "holo.nds"
 rompatch = "data/holo_patched.nds"
 headerfile = "data/extract/header.bin"
 bannerfile = "data/repack/banner.bin"
@@ -20,7 +20,7 @@ outfolder = "data/repack/"
 @click.option("--dat", is_flag=True, default=False)
 @click.option("--img", is_flag=True, default=False)
 @click.option("--wsb", is_flag=True, default=False)
-@click.option("--analyze", default="")
+@click.option("--analyze", default="", hidden=True)
 def extract(rom, bin, dat, img, wsb, analyze):
     all = not rom and not bin and not dat and not img and not wsb
     if all or rom:
@@ -44,14 +44,14 @@ def extract(rom, bin, dat, img, wsb, analyze):
 
 
 @common.cli.command()
-@click.option("--no-rom", is_flag=True, default=False)
+@click.option("--no-rom", is_flag=True, default=False, hidden=True)
 @click.option("--dat", is_flag=True, default=False)
 @click.option("--bin", is_flag=True, default=False)
 @click.option("--img", is_flag=True, default=False)
 @click.option("--wsb", is_flag=True, default=False)
 @click.option("--sub", is_flag=True, default=False)
-@click.option("--no-redirect", is_flag=True, default=False)
-@click.option("--force", default="")
+@click.option("--no-redirect", is_flag=True, default=False, hidden=True)
+@click.option("--force", default="", hidden=True)
 def repack(no_rom, dat, bin, img, wsb, sub, no_redirect, force):
     all = not sub and not dat and not bin and not img and not wsb
     firstgame = nds.getHeaderID(headerfile) == "YU5J2J"
@@ -94,17 +94,29 @@ def repack(no_rom, dat, bin, img, wsb, sub, no_redirect, force):
         nds.editBannerTitle(bannerfile, "Spice & Wolf\n" + subtitle + "\nASCII MEDIA WORKS")
         romf = romfile if os.path.isfile(romfile) else romfile.replace("holo", "holo2")
         romp = rompatch if os.path.isfile(romfile) else rompatch.replace("holo", "holo2")
-        nds.repackRom(romf, romp, outfolder, patchfile)
+        # TODO: we still use ndstool to repack in order to not break the bin_patch INJECT_START behavior
+        # nds.repackRom(romf, romp, outfolder, patchfile)
+        common.logMessage("Repacking ROM", rompatch, "...")
+        ndstool = common.bundledExecutable("ndstool.exe")
+        if not os.path.isfile(ndstool):
+            common.logError("ndstool not found")
+            return
+        common.execute(ndstool + " -c {rom} -9 {folder}arm9.bin -7 {folder}arm7.bin -y9 {folder}y9.bin -y7 {folder}y7.bin -t {folder}banner.bin -h {folder}header.bin -d {folder}data -y {folder}overlay".
+                    format(rom=romp, folder=outfolder), False)
+        common.logMessage("Done!")
+        # Create xdelta patch
+        if patchfile != "":
+            common.xdeltaPatch(patchfile, romf, romp)
 
 
-@common.cli.command()
+@common.cli.command(hidden=True)
 def patchdump():
     patchfile = "data/bad_to_good.xdelta"
     ndsfile = romfile if os.path.isfile(romfile) else romfile.replace("holo", "holo2")
     common.xdeltaPatch(patchfile, ndsfile.replace(".nds", "_bad.nds"), ndsfile)
 
 
-@common.cli.command()
+@common.cli.command(hidden=True)
 def dupe():
     seen = {}
     sections = common.getSections("data/wsb_output.txt")
@@ -123,8 +135,4 @@ def dupe():
 
 
 if __name__ == "__main__":
-    click.echo("OokamiTranslation version " + version)
-    if not os.path.isdir("data"):
-        common.logError("data folder not found.")
-        quit()
-    common.runCLI(common.cli)
+    common.setupTool("OokamiTranslation", version, "data", romfile if os.path.isfile(romfile) else romfile.replace("holo", "holo2"))

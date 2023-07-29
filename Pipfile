@@ -4,12 +4,11 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-pyinstaller = "*"
 
 [packages]
-hacktools = "*"
+hacktools = {extras = ["armips", "cli", "graphics", "nds", "xdelta"], version = "*"}
 ass = "*"
 ndstextgen = "*"
 
 [requires]
-python_version = "3.8"
+python_version = "3"

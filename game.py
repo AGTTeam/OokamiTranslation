@@ -15,10 +15,12 @@ monthsection = [
     (0x97920, 0x9797f),
     (0xc6bf4, 0xc6c50)
 ]
+usemonthsection = None
 skipsection = [
     [(0x9791c, 0x9791f)],
     [(0xc6bec, 0xc6bf3), (0xcfc80, 0xcfc83), (0xc73cd, 0xc73d1), (0xc3b78, 0xc3b7b), (0xc4540, 0xc4543), (0xd50a8, 0xd50ab)],
 ]
+useskipsection = None
 # Identifier and size of WSB code blocks
 wsbcodes = {
     (0x81, 0xb9): 6, (0x81, 0x1a): 6,
@@ -176,7 +178,7 @@ def readShiftJIS(f, len2=False, untilZero=False, encoding="shift_jis"):
                     sjis += f.read(2).decode(encoding).replace("〜", "～")
                 except UnicodeDecodeError:
                     common.logDebug("UnicodeDecodeError at", f.tell() - 2)
-                    sjis += "UNK(" + common.toHex(b1) + common.toHex(b2) + ")"
+                    sjis += "UNK(" + common.toHex(b1, True) + common.toHex(b2, True) + ")"
                 i += 2
                 j += 1
     if not untilZero and j != strlen:
@@ -187,16 +189,16 @@ def readShiftJIS(f, len2=False, untilZero=False, encoding="shift_jis"):
 def writeUNK(b1, b2):
     if b1 >= 32 and b1 <= 126 and b2 >= 32 and b2 <= 126:
         return chr(b1) + chr(b2)
-    return "UNK(" + common.toHex(b1) + common.toHex(b2) + ")"
+    return "UNK(" + common.toHex(b1, True) + common.toHex(b2, True) + ")"
 
 
 def detectShiftJIS(f, encoding="shift_jis"):
     ret = ""
     unk = 0
-    ismonth = monthsection is not None and f.tell() >= monthsection[0] and f.tell() <= monthsection[1]
+    ismonth = usemonthsection is not None and f.tell() >= usemonthsection[0] and f.tell() <= usemonthsection[1]
     while True:
-        if skipsection is not None:
-            for skiprange in skipsection:
+        if useskipsection is not None:
+            for skiprange in useskipsection:
                 if f.tell() >= skiprange[0] and f.tell() <= skiprange[1]:
                     return ""
         b1 = f.readByte()

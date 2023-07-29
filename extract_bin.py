@@ -8,12 +8,12 @@ def run(firstgame):
     # Set the appropriate range depending on the game
     if firstgame:
         binrange = game.binrange[0]
-        game.monthsection = game.monthsection[0]
-        game.skipsection = game.skipsection[0]
+        game.usemonthsection = game.monthsection[0]
+        game.useskipsection = game.skipsection[0]
     else:
         binrange = game.binrange[1]
-        game.monthsection = game.monthsection[1]
-        game.skipsection = game.skipsection[1]
+        game.usemonthsection = game.monthsection[1]
+        game.useskipsection = game.skipsection[1]
         # Decompress binary
         decompfile = infile.replace(".bin", "_dec.bin")
         common.logMessage("Decompressing BIN ...")

@@ -5,7 +5,7 @@ from hacktools import common
 
 
 def writeLine(out, pos, b1, b2, line):
-    out.write(common.toHex(pos).replace("0x", "").zfill(5) + " 0x" + common.toHex(b1) + ", 0x" + common.toHex(b2) + ": " + line + "  \n")
+    out.write(common.toHex(pos, True).replace("0x", "").zfill(5) + " 0x" + common.toHex(b1, True) + ", 0x" + common.toHex(b2, True) + ": " + line + "  \n")
 
 
 def run(firstgame, analyzefile):
